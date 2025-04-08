@@ -32,9 +32,9 @@ Estrutura do Repositório bash
 ├── tests/ # Scripts de teste 
 ├── README.md # Descrição do projeto Equipe de Desenvolvimento 
 
-Nome do Integrante 1: [Função e responsabilidades]
+Nome do Integrante 1: Natalia Patricia; Funções:
 
-Nome do Integrante 2: [Função e responsabilidades]
+Nome do Integrante 2: Denilson Santana; Funções:
 
 Cronograma de Atividades Etapa Data Inicial e Data Final Responsável Planejamento e Definição [dd/mm/yyyy] [dd/mm/yyyy] 
 Equipe:
