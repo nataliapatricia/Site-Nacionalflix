@@ -25,7 +25,7 @@ RF05 - O usuário deve ser capaz de compartilhar um título por redes sociais;
 Banco de dados: 
 Para esta versão do projeto, optamos por uma abordagem serverless (sem servidor) para simplificar a arquitetura e os custos de hospedagem. Todos os dados sobre os filmes, séries e plataformas de streaming são armazenados em um arquivo estático JSON. O próprio front-end (Javascript) é responsável por carregar, filtrar e exibir as informações, tornando a aplicação ágil de fácil manutenção para um escopo inicial.
 
-Ferramentas de versionamento: 
+Ferramentas de versionamento:  
 GitHub
 
 Estrutura do Repositório bash:  
@@ -33,15 +33,15 @@ Estrutura do Repositório bash:
 ├── src/ # Código-fonte do projeto  
 ├── assets/ # Imagens ou recursos visuais  
 ├── tests/ # Scripts de teste  
-├── README.md # Descrição do projeto Equipe de Desenvolvimento  
+├── README.md # Descrição do projeto Equipe de Desenvolvimento    
 
-Nome do Integrante 1: Denilson Santana;  
-Nome do Integrante 2: Natalia Patricia;  
-
-Cronograma de Atividades Etapa Data Inicial e Data Final Responsável Planejamento e Definição 06/02/2025 a 17/06/2025 Equipe: Denilson e Natalia  
-
+Cronograma de Atividades Etapa  
+Data Inicial e Data Final Responsável Planejamento e Definição 06/02/2025 a 17/06/2025  
 Desenvolvimento 06/02/2025 a 28/02/2025 Equipe: Denilson e Natalia  
 Testes e Validação 01/03/2025 a 30/04/2025 Equipe: Denilson e Natalia  
 Finalização e Apresentação 01/05/2025 a 17/06/2025 Equipe: Denilson e Natalia  
 
-Para mais informações acesse nossa wiki, lá tem informações como documentação tecnica, pesquisa de campo e protótipos de alta fidelidade. 
+Para mais informações acesse nossa wiki, lá tem informações como documentação tecnica, pesquisa de campo e protótipos de alta fidelidade.  
+
+Nome do Integrante 1: Denilson Santana;  
+Nome do Integrante 2: Natalia Patricia;  
