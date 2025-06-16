@@ -28,13 +28,6 @@ Para esta versão do projeto, optamos por uma abordagem serverless (sem servidor
 Ferramentas de versionamento:  
 GitHub
 
-Estrutura do Repositório bash:  
-├── docs/ # Documentação geral  
-├── src/ # Código-fonte do projeto  
-├── assets/ # Imagens ou recursos visuais  
-├── tests/ # Scripts de teste  
-├── README.md # Descrição do projeto Equipe de Desenvolvimento    
-
 Cronograma de Atividades Etapa  
 Data Inicial e Data Final Responsável Planejamento e Definição 06/02/2025 a 17/06/2025  
 Desenvolvimento 06/02/2025 a 28/02/2025 Equipe: Denilson e Natalia  
