@@ -1,0 +1,138 @@
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>O Auto da Compadecida NacionalFlix</title>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header class="main-header">
+            <div class="logo">NacionalFlix</div>
+            <nav class="main-nav">
+                <a href="principal.html">Página Inicial</a>
+                <a href="historico.html">O que já assisti</a>
+                <a href="configuracoes.html">Configurações</a>
+            </nav>
+            <div class="menu-icon" onclick="location.href='configuracoes.html'">&#9776;</div>
+        </header>
+
+    <div class="movie-container">
+                <div class="left-column">
+                    <div class="media-viewer">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="resumo">Resumo</button>
+                            <button class="tab-btn" data-tab="imagens">Imagens</button>
+                            <button class="tab-btn" data-tab="trailer">Trailer</button>
+                        </div>
+
+                        <div id="resumo" class="tab-content active">
+                            <h3>Sinopse:</h3>
+                            <p>As aventuras dos nordestinos João Grilo (Matheus Natchergaele), um sertanejo pobre e mentiroso, e Chicó (Selton Mello), o mais covarde dos homens. Ambos lutam pelo pão de cada dia e atravessam por vários episódios enganando a todos do pequeno vilarejo de Taperoá, no sertão da Paraíba. A salvação da dupla acontece com a aparição da Nossa Senhora (Fernanda Montenegro). Adaptação da obra de Ariano Suassuna.</p>
+                            <div class="watch-on">
+                                <h4>Onde assistir:</h4>
+                                <img src="img/Globoplay.png" alt="Logo Globoplay">
+                                <img src="img/telecine.png" alt="Logo Telecine">
+                            </div>
+                        </div>
+                        
+                        <div id="imagens" class="tab-content">
+                            <div class="gallery">
+                                <img src="img/AdC 1.jpg" alt="Cena do filme O Auto da Compadecida">
+                                <div class="gallery-nav">
+                                    <button class="arrow">&lt;</button>
+                                    <div class="dots">
+                                        <span class="dot"></span>
+                                        <span class="dot active"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                    </div>
+                                    <button class="arrow">&gt;</button>
+                                </div>
+                            </div>
+                            <div class="photo-caption">
+                                <p>O Auto da Compadecida</p>
+                                <span>Fotos publicadas em 09 de janeiro de 2012</span>
+                            </div>
+                        </div>
+
+                        <div id="trailer" class="tab-content">
+                            <div class="trailer-container">
+                                <iframe src="https://www.youtube.com/embed/ewaz-WuKdo8?si=YUDTHN1GUQHM7NZ8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="user-reviews">
+                        <h2>Crítica dos Usuários:</h2>
+                        <div class="review-summary">
+                            <span>Média</span>
+                            <div class="rating">
+                                <strong>4,9</strong>
+                            </div>
+                        </div>
+                        <article class="review-card">
+                            <div class="review-author">
+                                <span class="author-score">5</span>
+                                <p>Alano Alencar</p>
+                            </div>
+                            <div class="review-content">
+                                <div class="rating">
+                                    <strong>5</strong>
+                                </div>
+                                <p>O melhor filme de comédia brasileira de todos os tempos, dificilmente algum outro filme brasileiro chegará ao nível desse. O filme é engraçado do início ao fim, com uma história bem elaborada e envolvente. Elenco excelente, com destaque para Matheus e Selton Mello, com atuações impecáveis. Vale muito a pena assistir.</p>
+                            </div>
+                        </article>
+                        <article class="review-card">
+                            <div class="review-author">
+                                <span class="author-score">5</span>
+                                <p>Monica</p>
+                            </div>
+                            <div class="review-content">
+                                <div class="rating">
+                                    <strong>5</strong>
+                                </div>
+                                <p>O melhor filme brasileiro,sem dúvida! Muito divertido, e o melhor de tudo é a corrupção da Igreja ;)</p>
+                            </div>
+                        </article>
+                        <article class="review-card">
+                            <div class="review-author">
+                                <span class="author-score">4</span>
+                                <p>Jennifer Lopes</p>
+                            </div>
+                            <div class="review-content">
+                                <div class="rating">
+                                    <strong>4,8</strong>
+                                </div>
+                                <p>O filme que define o cinema brasileiro, e a brasilidade propriamente dita. Literatura de cordel, sertão nordestino, folclore, religião. Tudo se mistura em uma grande encenação cômica muito bem adaptada para as telonas por Guel Arraes. Matheus Nachtergaele é um monstro, merecia(no mínimo) uma indicação ao Oscar de Melhor Ator Coadjuvante.</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="right-column">
+                    <img class="poster" src="img/Capa O auto da compadecida.jpg">
+                    <h2 class="movie-title">O Auto da Compadecida</h2>
+                    <div class="movie-info">
+                        <p>10 de setembro de 2000 nos cinemas | 1h 35min | Aventura, Comédia</p>
+                        <p><strong>Direção:</strong> Guel Arraes</p>
+                        <p><strong>Roteiro:</strong> Guel Arraes, João Falcão</p>
+                        <p><strong>Elenco:</strong> Matheus Nachtergaele, Selton Mello, Denise Fraga</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-evaluate">Avaliar</button>
+                        <button class="btn-share">Compartilhar</button>
+                    </div>
+                    <div class="watched-container">
+                        <label for="watched-checkbox">
+                        <input type="checkbox" id="watched-checkbox" name="watched">
+                        Já assisti
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        <script src="js/script.js"></script>
+    </body>
+    </html>

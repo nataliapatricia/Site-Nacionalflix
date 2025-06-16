@@ -1,0 +1,382 @@
+/* === CONFIGURAÇÕES GLOBAIS E RESET === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+/* === TELAS DE LOGIN E CADASTRO === */
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80vh;
+    text-align: center;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.auth-form h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.auth-form p {
+    margin-bottom: 30px;
+    color: #b3b3b3;
+}
+
+.auth-form label {
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+.auth-form input {
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 5px;
+    color: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    font-size: 1em;
+}
+
+.auth-form .btn {
+    background-color: #666;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.auth-form .btn:hover {
+    background-color: #777;
+}
+
+.auth-container a {
+    margin-top: 15px;
+    text-decoration: underline;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #141414;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+}
+
+a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #b3b3b3;
+}
+
+.main-container {
+    padding: 20px 60px;
+}
+
+/* === HEADER (CABEÇALHO) === */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+    border-bottom: 1px solid #303030;
+    background-color: #141414;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e50914; /* Cor inspirada na Netflix */
+}
+
+.main-nav a {
+    margin-left: 25px;
+    font-size: 1rem;
+}
+
+.menu-icon {
+    font-size: 1.8em;
+    cursor: pointer;
+    display: none; /* Opcional: mostrar apenas em telas menores com Media Queries */
+}
+
+
+/* === PÁGINA INICIAL (index.html) === */
+.search-bar {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.search-bar input {
+    width: 50%;
+    padding: 15px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.recommendations h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    justify-content: center;
+    display: flex;
+}
+
+.movie-carousel {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    justify-content: center;
+}
+
+.movie-card {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.movie-card img {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 5px;
+    transition: transform 0.2s;
+}
+
+.movie-card img:hover {
+    transform: scale(1.05);
+}
+
+.movie-card p {
+    margin-top: 10px;
+    font-size: 1em;
+}
+
+
+/* === PÁGINAS DE FILMES (filme.html, etc.) === */
+.movie-container {
+    display: grid;
+    /* Esta linha é a chave: cria duas colunas e define a proporção entre elas */
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); 
+    gap: 40px;
+    max-width: 1300px;
+    margin: 40px auto; /* Adiciona margem vertical para espaçamento */
+    padding: 20px;
+
+}
+
+/* Coluna da Esquerda (Conteúdo) */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.media-viewer {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.tabs {
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background-color: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.tab-btn.active {
+    background-color: #f5f5f5;
+    color: #111;
+    border-color: #f5f5f5;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+#resumo h3, .user-reviews h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: #ddd;
+}
+
+#resumo p {
+    line-height: 1.6;
+    color: #ccc;
+}
+
+.watch-on {
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.watch-on h4 {
+    font-size: 1rem;
+    color: #ddd;
+}
+
+.watch-on img {
+    height: 25px;
+}
+
+/* Galeria de Imagens */
+.gallery {
+    position: relative;
+    width: 100%;
+    margin: auto;
+    overflow: hidden;
+}
+.gallery img {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+.gallery-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+.arrow {
+    background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
+}
+.dots {
+    display: flex; gap: 8px;
+}
+.dot {
+    width: 10px; height: 10px; background-color: #555; border-radius: 50%; cursor: pointer;
+}
+.dot.active {
+    background-color: #fff;
+}
+.photo-caption {
+    font-size: 0.9rem; color: #aaa; margin-top: 10px;
+}
+.photo-caption span {
+    font-size: 0.8rem; color: #777;
+}
+
+/* Trailer */
+.trailer-container img, .trailer-container iframe {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 16 / 9;
+}
+
+/* Críticas de Usuários */
+.review-summary {
+    display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+}
+.rating strong {
+    font-size: 1.5rem;
+}
+.review-card {
+    display: flex; gap: 20px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px;
+}
+.author-score {
+    background-color: #333; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; flex-shrink: 0;
+}
+.review-author p {
+    font-size: 0.9rem;
+}
+.review-content .rating {
+    margin-bottom: 10px;
+}
+
+/* Coluna da Direita (Sidebar) */
+.right-column {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.poster {
+    width: 100%; max-width: 250px; border-radius: 8px; margin-bottom: 20px;
+}
+.movie-title {
+    font-size: 1.8rem; margin-bottom: 15px;
+}
+.movie-info p {
+    margin-bottom: 10px; color: #ccc; font-size: 0.9rem;
+}
+.movie-info strong {
+    color: #fff;
+}
+.action-buttons {
+    display: flex; gap: 15px; margin: 20px 0;
+}
+.action-buttons button {
+    padding: 12px 30px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+}
+.btn-evaluate {
+    background-color: #fff; color: #000;
+}
+.btn-share {
+    background-color: #333; color: #fff; border: 1px solid #555;
+}
+
+.watched-container {
+    margin-top: 15px; text-align: center;
+}
+.watched-container label {
+    font-size: 1em; color: #ccc; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+
+
+/* === PÁGINAS DE HISTÓRICO, CONFIGURAÇÕES E COMENTÁRIO === */
+.page-title {
+    text-align: center; font-size: 2em; margin: 40px 0;
+}
+
+/* Histórico */
+.history-list { max-width: 800px; margin: 0 auto; }
+.history-item { display: flex; align-items: center; background-color: #222; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+.history-item img { width: 80px; margin-right: 20px; border-radius: 4px; }
+.history-item-title { flex-grow: 1; font-size: 1.2em; }
+
+/* Configurações */
+.streaming-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; text-align: center; }
+.streaming-logo { background-color: #222; padding: 20px; border-radius: 5px; }
+.streaming-logo label { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; height: 100%; }
+.streaming-logo img { max-width: 120px; transition: filter 0.3s; margin-bottom: 15px; }
+.streaming-logo input[type="checkbox"]:checked + img, .streaming-logo:hover img { filter: grayscale(0%); }
+.streaming-logo input[type="checkbox"] { width: 18px; height: 18px; }
+
+/* Comentário */
+.comment-section { max-width: 800px; margin: 0 auto; }
+.comment-form textarea { width: 100%; height: 150px; background-color: #333; border: 1px solid #555; color: #fff; padding: 10px; border-radius: 5px; font-family: 'Inter', sans-serif; font-size: 1rem; }
+.comment-form .btn { background-color: #666; border: none; border-radius: 5px; color: #fff; padding: 15px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 10px; }
+

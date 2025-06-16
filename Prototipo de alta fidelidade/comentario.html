@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazer Comentário - NacionalFlix</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">NacionalFlix</div>
+        <nav class="main-nav">
+            <a href="principal.html">Página Inicial</a>
+            <a href="historico.html">O que já assisti</a>
+            <a href="configuracoes.html">Configurações</a>
+        </nav>
+        <div class="menu-icon" onclick="location.href='configuracoes.html'">&#9776;</div>
+    </header>
+
+    <main class="main-container">
+        <h1 class="page-title">Faça um comentário sobre o filme que você assistiu</h1>
+
+        <div class="comment-section">
+            <form class="comment-form">
+                <div style="margin-bottom: 20px; font-size: 1.2em;">
+                    <label>Avaliação:</label>
+                    <span>☆☆☆☆☆ 0/5</span>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="comment-text">Comentário:</label>
+                    <textarea id="comment-text"></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn" onclick="alert('Comentário enviado!'); event.preventDefault(); window.history.back();">Enviar</button>
+                    <button type="button" class="btn" style="background-color: #444;" onclick="window.history.back();">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

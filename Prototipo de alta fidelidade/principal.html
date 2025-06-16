@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NacionalFlix</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">NacionalFlix</div>
+        <nav class="main-nav">
+            <a href="principal.html">Página Inicial</a>
+            <a href="historico.html">O que já assisti</a>
+            <a href="configuracoes.html">Configurações</a>
+        </nav>
+        <div class="menu-icon" onclick="location.href='configuracoes.html'">&#9776;</div>
+    </header>
+
+    <main class="main-container">
+        <div class="search-bar">
+            <input type="text" placeholder="Pesquise por algum título específico aqui">
+        </div>
+
+        <section class="recommendations">
+            <h2>Nossas principais recomendações para o seu perfil</h2>
+            <div class="movie-carousel">
+                <div class="movie-card">
+                    <a href="filme.html"><img src="img/Capa 2 tropa de elite.jpg" alt="Tropa de Elite"></a>
+                    <p>Tropa de Elite</p>
+                </div>
+                <div class="movie-card">
+                    <a href="cidadedeus.html"><img src="img/Capa cidade de deus.jpg" alt="Cidade de Deus"></a>
+                    <p>Cidade de Deus</p>
+                </div>
+                <div class="movie-card">
+                    <a href="centralbrasil.html"><img src="img/Capa central do brasil.jpg" alt="Central do Brasil"></a>
+                    <p>Central do Brasil</p>
+                </div>
+                <div class="movie-card">
+                    <a href="compadecida.html"><img src="img/Capa O auto da compadecida.jpg" alt="O Auto da Compadecida"></a>
+                    <p>O Auto da Compadecida</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
