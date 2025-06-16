@@ -15,12 +15,14 @@ Tecnologias utilizadas:
 Linguagens utilizadas: HTML, CSS, Javascript  
 Frameworks ou ferramentas utilizadas: VScode, Figma, Google Formulários.  
 
-Requisitos funcionais:  
-RF01 - Buscar títulos no site;  
-RF02 - O site deve informar plataformas de streaming que o título selecionado está disponivel para ser assistido, além de imagens do filme e trailer;  
-RF03 - O usuário deve ser capaz de selecionar as plataformas de streaming que ele é assinante para mostrar títulos compatíveis;  
-RF04 - O usuário deve ser capaz de filtrar produções por ano, gênero e data de lançamento;  
-RF05 - O usuário deve ser capaz de compartilhar um título por redes sociais;  
+Requisitos Funcionais:  
+RF01 - Usuário realizar o cadastro no site;  
+RF02 - Buscar títulos no site;  
+RF03 - O site deve informar plataformas de streaming que o título selecionado está disponivel para ser assistido, além de imagens do filme e trailer;  
+RF04 - O usuário deve ser capaz de selecionar as plataformas de streaming que ele é assinante para mostrar títulos compatíveis;  
+RF05 - O usuário deve ser capaz de filtrar produções por ano, gênero e data de lançamento;    
+RF06 - O usuário deve ser capaz de compartilhar um título por redes sociais;  
+RF07 - Marcar filmes e séries assistidos;  
 
 Banco de dados: 
 Para esta versão do projeto, optamos por uma abordagem serverless (sem servidor) para simplificar a arquitetura e os custos de hospedagem. Todos os dados sobre os filmes, séries e plataformas de streaming são armazenados em um arquivo estático JSON. O próprio front-end (Javascript) é responsável por carregar, filtrar e exibir as informações, tornando a aplicação ágil de fácil manutenção para um escopo inicial.
