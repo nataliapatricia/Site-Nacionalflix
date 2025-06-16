@@ -10,8 +10,7 @@ Integrar conhecimentos de linguagens de programação, análise e design de sist
 Buscar a criatividade e a capacidade de resolução de problemas complexos;  
 Estimular o trabalho colaborativo e a boa documentação do processo de desenvolvimento;  
 
-Escopo e Requisitos do Projeto:  
-Tecnologias utilizadas:  
+Escopo e Requisitos do Projeto:   
 Linguagens utilizadas: HTML, CSS, Javascript  
 Frameworks ou ferramentas utilizadas: VScode, Figma, Google Formulários.  
 
