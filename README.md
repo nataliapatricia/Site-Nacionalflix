@@ -39,3 +39,5 @@ Para mais informações acesse nossa wiki, lá tem informações como documenta�
 
 Nome do Integrante 1: Denilson Santana;  
 Nome do Integrante 2: Natalia Patricia;  
+
+Os códigos foram gerados com o auxilio de inteligência artificial.  
