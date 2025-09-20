@@ -3,35 +3,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchBar = document.getElementById('search-bar');
     const backendUrl = 'http://localhost:3000/api';
 
-    let allMovies = []; // Armazena todos os filmes para o filtro
-
-    // 1. Verifica se o usuário está logado e qual a sua role
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
-    if (!usuarioLogadoJSON) {
-        // Se não estiver logado, volta para a tela de login
-        window.location.href = 'index.html';
-        return;
-    }
-    const usuario = JSON.parse(usuarioLogadoJSON);
-    const isDev = usuario.role === 'dev';
+    const usuario = usuarioLogadoJSON ? JSON.parse(usuarioLogadoJSON) : {};
 
-    // Função para renderizar os filmes na tela
+    // Linha de depuração crucial
+    console.log('Usuário logado na PÁGINA PRINCIPAL:', usuario);
+
+    // Lógica de permissão segura
+    const isDev = usuario && usuario.role === 'dev';
+
+    let allMovies = [];
+
     const renderMovies = (filmes) => {
         movieList.innerHTML = '';
         if (filmes.length === 0) {
             movieList.innerHTML = '<p>Nenhum filme encontrado.</p>';
             return;
         }
-
         filmes.forEach(filme => {
             const movieCard = document.createElement('div');
             movieCard.className = 'movie-card';
+            
+            const deleteButtonHTML = isDev 
+                ? `<button class="delete-btn" data-id="${filme.id}" title="Excluir filme">×</button>` 
+                : '';
+
             movieCard.innerHTML = `
                 <a href="filme.html?id=${filme.id}">
                     <img src="${filme.url_poster}" alt="${filme.titulo}">
                 </a>
                 <p>${filme.titulo}</p>
-                <button class="delete-btn" data-id="${filme.id}" title="Excluir filme">×</button>
+                ${deleteButtonHTML}
             `;
             movieList.appendChild(movieCard);
         });

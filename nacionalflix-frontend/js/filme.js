@@ -3,14 +3,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('movie-details-container');
     const backendUrl = 'http://localhost:3000/api';
 
-    // --- VERIFICAÇÃO DE LOGIN E PERMISSÃO (JÁ EXISTENTE) ---
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
-    if (!usuarioLogadoJSON) {
-        window.location.href = 'index.html';
-        return;
-    }
-    const usuario = JSON.parse(usuarioLogadoJSON);
-    const isDev = usuario.role === 'dev';
+    // Não precisamos mais do IF que redireciona, pois o global.js já faz isso.
+    
+    const usuario = usuarioLogadoJSON ? JSON.parse(usuarioLogadoJSON) : {};
+
+    console.log('Usuário logado na PÁGINA DE FILME:', usuario);
+
+    const isDev = usuario && usuario.role === 'dev';
 
     // --- CAPTURANDO O ID DO FILME DA URL (JÁ EXISTENTE) ---
     const params = new URLSearchParams(window.location.search);
