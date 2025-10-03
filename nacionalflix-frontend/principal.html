@@ -16,21 +16,45 @@
     </header>
 
     <main class="main-container">
+    
         <div class="search-container">
-            <input type="search" id="search-bar" placeholder="Pesquise por algum título específico aqui">
+          <input type="search" id="search-bar" placeholder="Pesquise por algum título específico aqui">
         </div>
 
         <section class="recommendations">
-            <h2>Nossas principais recomendações</h2>
+            <div class="recommendations-header">
+                <h2>Nossas principais recomendações</h2>
+            
+                <button id="add-movie-btn" class="btn-add" style="display: none;">+ Adicionar Filme</button>
+            </div>
+        
             <div id="movie-list" class="movie-carousel">
                 </div>
         </section>
+
     </main>
 
+    <div id="add-movie-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Adicionar Novo Filme</h2>
+            <form id="add-movie-form">
+                <input type="text" id="titulo" name="titulo" placeholder="Título do Filme" required>
+                <textarea id="sinopse" name="sinopse" placeholder="Sinopse" required></textarea>
+                <input type="number" id="ano_lancamento" name="ano_lancamento" placeholder="Ano de Lançamento" required>
+                <input type="number" id="duracao_min" name="duracao_min" placeholder="Duração (em minutos)" required>
+                <input type="text" id="genero" name="genero" placeholder="Gênero(s) (separados por vírgula)" required>
+                <input type="text" id="diretores" name="diretores" placeholder="Diretor(es)" required>
+                <textarea id="elenco" name="elenco" placeholder="Elenco Principal (separado por vírgula)"></textarea>
+                <input type="text" id="url_poster" name="url_poster" placeholder="URL da Imagem do Pôster" required>
+                <textarea id="imagens" name="imagens" placeholder="URLs das Imagens da Galeria (uma por linha)"></textarea>
+                <input type="text" id="url_trailer" name="url_trailer" placeholder="URL de Incorporação do Trailer (YouTube)" required>
+                <button id="add-movie-btn" class="btn-add" style="display: none;">+ Adicionar Filme</button>
+            </form>
+        </div>
+    </div>
+    
     <script src="js/global.js"></script>
-    <script src="js/principal.js"></script>
-
-    <script src="js/global.js"></script>
-    <script src="js/filme.js"></script>
+    <script src="js/principal.js"></script> </body>
 </body>
 </html>
