@@ -80,10 +80,63 @@ router.post('/recuperar-senha', async (req, res) => {
     res.status(200).json({ message: 'Se o e-mail existir em nossa base, um link de recuperação será enviado.' });
 });
 
-// NOVA ROTA: BUSCAR TODOS OS FILMES PARA A PÁGINA PRINCIPAL
+// --- ROTAS DE FILMES ---
+
+// ROTA DE BUSCAR OPÇÕES DE FILTRO (VEM PRIMEIRO!)
+router.get('/filmes/filtros', async (req, res) => {
+    try {
+        // 1. Busca todos os gêneros do banco de dados
+        const [generosResult] = await db.query("SELECT genero FROM filmes WHERE genero IS NOT NULL AND genero != ''");
+        const [anosResult] = await db.query("SELECT DISTINCT ano_lancamento FROM filmes WHERE ano_lancamento IS NOT NULL ORDER BY ano_lancamento DESC");
+
+        // 2. Processa a lista de gêneros
+        const todosOsGeneros = new Set(); // Usamos um Set para garantir que não haverá gêneros duplicados
+        
+        generosResult.forEach(item => {
+            // "Quebra" a string "Ação, Drama, Policial" em um array ["Ação", " Drama", " Policial"]
+            const generosDoFilme = item.genero.split(','); 
+            
+            // Adiciona cada gênero individualmente ao nosso Set, removendo espaços em branco
+            generosDoFilme.forEach(genero => {
+                todosOsGeneros.add(genero.trim());
+            });
+        });
+
+        // 3. Converte o Set de volta para um array e o ordena alfabeticamente
+        const generosUnicos = Array.from(todosOsGeneros).sort();
+        const anos = anosResult.map(item => item.ano_lancamento);
+
+        // 4. Envia a lista limpa e ordenada para o frontend
+        res.status(200).json({ generos: generosUnicos, anos });
+
+    } catch (error) {
+        console.error("Erro ao buscar opções de filtro:", error);
+        res.status(500).json({ message: "Erro ao buscar opções de filtro." });
+    }
+});
+
+// ROTA DE BUSCAR TODOS OS FILMES (COM FILTRO OPCIONAL)
 router.get('/filmes', async (req, res) => {
     try {
-        const [filmes] = await db.query('SELECT id, titulo, url_poster FROM filmes ORDER BY titulo');
+        const { genero, ano } = req.query;
+        let query = 'SELECT id, titulo, url_poster FROM filmes';
+        const params = [];
+        const whereClauses = [];
+
+        if (genero) {
+            whereClauses.push('genero LIKE ?');
+            params.push(`%${genero}%`);
+        }
+        if (ano) {
+            whereClauses.push('ano_lancamento = ?');
+            params.push(ano);
+        }
+        if (whereClauses.length > 0) {
+            query += ` WHERE ${whereClauses.join(' AND ')}`;
+        }
+        query += ' ORDER BY titulo';
+
+        const [filmes] = await db.query(query, params);
         res.status(200).json(filmes);
     } catch (error) {
         console.error('Erro ao buscar filmes:', error);
@@ -91,43 +144,39 @@ router.get('/filmes', async (req, res) => {
     }
 });
 
-// ROTA: BUSCAR OS DETALHES DE UM FILME ESPECÍFICO
+// ROTA DE BUSCAR DETALHES DE UM FILME (COM PARÂMETRO, VEM POR ÚLTIMO!)
 router.get('/filmes/:id', async (req, res) => {
     const { id } = req.params;
+    const { usuario_id } = req.query;
     try {
-        // Busca os dados principais do filme
         const [filmes] = await db.query('SELECT * FROM filmes WHERE id = ?', [id]);
         if (filmes.length === 0) {
             return res.status(404).json({ message: 'Filme não encontrado.' });
         }
-        
-        // Busca as imagens do filme
         const [imagens] = await db.query('SELECT url_imagem FROM imagens_filme WHERE filme_id = ?', [id]);
-        
-        // Busca os comentários (juntando com a tabela de usuários para pegar o nome)
         const [comentarios] = await db.query(`
-            SELECT c.id, c.nota, c.comentario, u.nome_usuario 
-            FROM comentarios c
-            JOIN usuarios u ON c.usuario_id = u.id
-            WHERE c.filme_id = ?
-            ORDER BY c.data_comentario DESC
+            SELECT c.id, c.usuario_id, c.nota, c.comentario, u.nome_usuario, c.data_comentario
+            FROM comentarios c JOIN usuarios u ON c.usuario_id = u.id
+            WHERE c.filme_id = ? ORDER BY c.data_comentario DESC
         `, [id]);
-
-        // Calcula a média das avaliações
-        const [avgResult] = await db.query(
-            'SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?',
-            [id]
-        );
+        const [avgResult] = await db.query('SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?', [id]);
         const media_avaliacoes = avgResult[0].media || 0;
 
-        // Monta o objeto final com TODAS as informações
+        let assistido = false;
+        if (usuario_id) { // Só verifica se o ID do usuário foi enviado
+            const [historicoStatus] = await db.query(
+                'SELECT id FROM historico_assistidos WHERE usuario_id = ? AND filme_id = ?',
+                [usuario_id, id]
+            );
+            assistido = historicoStatus.length > 0;
+        }
         const resultado = {
-            ...filmes[0], // <-- ESTA LINHA É A MAIS IMPORTANTE! Ela pega tudo do filme (titulo, sinopse, url_poster etc.)
+            ...filmes[0],
             imagens: imagens.map(img => img.url_imagem),
             comentarios: comentarios,
-            media_avaliacoes: media_avaliacoes
+            media_avaliacoes: media_avaliacoes,
+            assistido: assistido
         };
-
         res.status(200).json(resultado);
     } catch (error) {
         console.error('[BACKEND ERRO] Falha ao buscar detalhes do filme:', error);
@@ -196,26 +245,37 @@ router.post('/filmes', async (req, res) => {
     }
 });
 
-// ROTA: SALVAR UM NOVO COMENTÁRIO (ATUALIZADA)
+// ROTA: SALVAR UM NOVO COMENTÁRIO (ATUALIZADA COM VERIFICAÇÃO)
 router.post('/comentarios', async (req, res) => {
     const { filme_id, usuario_id, nota, comentario } = req.body;
-    // ... (validação continua a mesma) ...
+    if (!filme_id || !usuario_id || !nota) {
+        return res.status(400).json({ message: 'Filme, usuário e nota são obrigatórios.' });
+    }
 
     try {
-        // 1. Insere o novo comentário
+        // *** NOVO: VERIFICA SE O USUÁRIO JÁ COMENTOU NESTE FILME ***
+        const [existingComments] = await db.query(
+            'SELECT id FROM comentarios WHERE filme_id = ? AND usuario_id = ?',
+            [filme_id, usuario_id]
+        );
+
+        if (existingComments.length > 0) {
+            // Se já existe, retorna um erro de conflito
+            return res.status(409).json({ message: 'Você já avaliou este filme.' });
+        }
+        // *** FIM DA VERIFICAÇÃO ***
+
+        // Se não existe, insere o novo comentário (código original)
         const [result] = await db.query(
             'INSERT INTO comentarios (filme_id, usuario_id, nota, comentario) VALUES (?, ?, ?, ?)',
             [filme_id, usuario_id, nota, comentario]
         );
-        
-        // 2. Recalcula a nova média para o filme
-        const [avgResult] = await db.query(
-            'SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?',
-            [filme_id]
-        );
+
+        // Recalcula a nova média
+        const [avgResult] = await db.query('SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?', [filme_id]);
         const novaMedia = avgResult[0].media || 0;
 
-        // 3. Retorna a resposta de sucesso JUNTO COM a nova média
+        // Retorna sucesso com o ID do novo comentário e a nova média
         res.status(201).json({ 
             message: 'Comentário adicionado com sucesso!', 
             commentId: result.insertId,
@@ -223,7 +283,8 @@ router.post('/comentarios', async (req, res) => {
         });
 
     } catch (error) {
-        // ... (tratamento de erro) ...
+        console.error("Erro ao salvar comentário:", error);
+        res.status(500).json({ message: 'Erro ao salvar o comentário.' });
     }
 });
 
@@ -236,6 +297,136 @@ router.delete('/comentarios/:id', async (req, res) => {
     } catch (error) {
         console.error("Erro ao excluir comentário:", error);
         res.status(500).json({ message: 'Erro ao excluir comentário.' });
+    }
+});
+
+// NOVA ROTA: BUSCAR OPÇÕES DE FILTRO (GÊNEROS E ANOS)
+router.get('/filmes/filtros', async (req, res) => {
+    try {
+        const [generosResult] = await db.query("SELECT DISTINCT genero FROM filmes WHERE genero IS NOT NULL AND genero != '' ORDER BY genero");
+        const [anosResult] = await db.query("SELECT DISTINCT ano_lancamento FROM filmes WHERE ano_lancamento IS NOT NULL ORDER BY ano_lancamento DESC");
+
+        const generos = generosResult.map(item => item.genero);
+        const anos = anosResult.map(item => item.ano_lancamento);
+
+        res.status(200).json({ generos, anos });
+    } catch (error) {
+        console.error("Erro ao buscar opções de filtro:", error);
+        res.status(500).json({ message: "Erro ao buscar opções de filtro." });
+    }
+});
+
+// NOVA ROTA: ATUALIZAR UM COMENTÁRIO EXISTENTE
+router.put('/comentarios/:id', async (req, res) => {
+    const { id } = req.params; // ID do comentário a ser editado
+    const { usuario_id, nota, comentario } = req.body; // ID do usuário que está TENTANDO editar
+
+    // Validação básica
+    if (!usuario_id || !nota || !id) {
+        return res.status(400).json({ message: 'ID do comentário, ID do usuário e nota são obrigatórios.' });
+    }
+
+    try {
+        // 1. Busca o comentário para verificar o dono
+        const [comments] = await db.query(
+            'SELECT usuario_id, filme_id FROM comentarios WHERE id = ?', 
+            [id]
+        );
+
+        if (comments.length === 0) {
+            return res.status(404).json({ message: 'Comentário não encontrado.' });
+        }
+
+        const comment = comments[0];
+
+        // 2. *** VERIFICAÇÃO DE PERMISSÃO: O usuário logado é o dono do comentário? ***
+        if (comment.usuario_id !== usuario_id) {
+            return res.status(403).json({ message: 'Você não tem permissão para editar este comentário.' });
+        }
+
+        // 3. Se for o dono, atualiza o comentário
+        await db.query(
+            'UPDATE comentarios SET nota = ?, comentario = ? WHERE id = ?',
+            [nota, comentario, id]
+        );
+
+        // 4. Recalcula a nova média do filme
+        const [avgResult] = await db.query(
+            'SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?', 
+            [comment.filme_id] // Usa o filme_id do comentário buscado
+        );
+        const novaMedia = avgResult[0].media || 0;
+
+        // 5. Retorna sucesso com a nova média
+        res.status(200).json({ 
+            message: 'Comentário atualizado com sucesso!',
+            novaMedia: novaMedia 
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar comentário:", error);
+        res.status(500).json({ message: 'Erro ao atualizar o comentário.' });
+    }
+});
+
+// NOVA ROTA: MARCAR UM FILME COMO ASSISTIDO
+router.post('/historico', async (req, res) => {
+    const { usuario_id, filme_id } = req.body;
+    if (!usuario_id || !filme_id) {
+        return res.status(400).json({ message: 'ID do usuário e do filme são obrigatórios.' });
+    }
+    try {
+        await db.query(
+            'INSERT INTO historico_assistidos (usuario_id, filme_id) VALUES (?, ?)',
+            [usuario_id, filme_id]
+        );
+        res.status(201).json({ message: 'Filme marcado como assistido.' });
+    } catch (error) {
+        // Ignora erro se já estiver marcado (UNIQUE constraint)
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(200).json({ message: 'Filme já estava marcado.' });
+        }
+        console.error("Erro ao marcar filme:", error);
+        res.status(500).json({ message: 'Erro ao marcar filme.' });
+    }
+});
+
+// NOVA ROTA: DESMARCAR UM FILME COMO ASSISTIDO
+router.delete('/historico/:usuario_id/:filme_id', async (req, res) => {
+    const { usuario_id, filme_id } = req.params;
+    try {
+        await db.query(
+            'DELETE FROM historico_assistidos WHERE usuario_id = ? AND filme_id = ?',
+            [usuario_id, filme_id]
+        );
+        res.status(200).json({ message: 'Filme desmarcado.' });
+    } catch (error) {
+        console.error("Erro ao desmarcar filme:", error);
+        res.status(500).json({ message: 'Erro ao desmarcar filme.' });
+    }
+});
+
+// NOVA ROTA: BUSCAR HISTÓRICO DE UM USUÁRIO
+router.get('/historico/:usuario_id', async (req, res) => {
+    const { usuario_id } = req.params;
+    try {
+        const [historico] = await db.query(`
+            SELECT 
+                f.id, 
+                f.titulo, 
+                f.url_poster, 
+                c.nota AS sua_nota -- Pega a nota dada PELO usuário logado
+            FROM historico_assistidos h
+            JOIN filmes f ON h.filme_id = f.id
+            LEFT JOIN comentarios c ON c.filme_id = f.id AND c.usuario_id = h.usuario_id -- Junta com comentários DO usuário
+            WHERE h.usuario_id = ?
+            ORDER BY h.data_marcado DESC
+        `, [usuario_id]);
+        
+        res.status(200).json(historico);
+    } catch (error) {
+        console.error("Erro ao buscar histórico:", error);
+        res.status(500).json({ message: 'Erro ao buscar histórico.' });
     }
 });
 
