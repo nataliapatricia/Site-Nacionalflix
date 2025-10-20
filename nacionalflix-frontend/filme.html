@@ -11,6 +11,7 @@
             <div class="logo">NacionalFlix</div>
                 <nav class="main-nav">
                     <a href="principal.html">Página Inicial</a>
+                    <a href="historico.html">Histórico</a>
                     <a href="#" id="logout-button">Sair</a>
                 </nav>
         </header>
@@ -31,6 +32,23 @@
                     <div class="modal-actions">
                         <button type="button" class="btn-cancel">Cancelar</button>
                         <button type="submit" class="btn-submit">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="edit-review-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>Editar sua avaliação</h2>
+                <form id="edit-review-form">
+                    <input type="hidden" id="edit-comment-id"> <div class="star-rating">
+                        <span data-value="5">&#9733</span><span data-value="4">&#9733</span><span data-value="3">&#9733</span><span data-value="2">&#9733</span><span data-value="1">&#9733</span>
+                    </div>
+                    <textarea id="edit-comment-text" placeholder="Edite seu comentário aqui..."></textarea>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn-submit">Salvar Alterações</button>
                     </div>
                 </form>
             </div>

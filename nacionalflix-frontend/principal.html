@@ -11,28 +11,51 @@
         <div class="logo">NacionalFlix</div>
         <nav class="main-nav">
             <a href="principal.html">Página Inicial</a>
+            <a href="historico.html">Histórico</a>
             <a href="#" id="logout-button">Sair</a>
         </nav>
     </header>
 
     <main class="main-container">
-    
         <div class="search-container">
-          <input type="search" id="search-bar" placeholder="Pesquise por algum título específico aqui">
+            <input type="search" id="search-bar" placeholder="Pesquise por algum título específico aqui">
+                <button id="filter-btn" class="btn-filter" title="Abrir filtros">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>FILTRAR
+                </button>
         </div>
 
         <section class="recommendations">
             <div class="recommendations-header">
                 <h2>Nossas principais recomendações</h2>
-            
                 <button id="add-movie-btn" class="btn-add" style="display: none;">+ Adicionar Filme</button>
             </div>
         
-            <div id="movie-list" class="movie-carousel">
-                </div>
+            <div id="movie-list" class="movie-carousel"></div>
         </section>
-
     </main>
+
+    <div id="filter-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Filtrar Filmes</h2><br><br>
+            <form id="filter-form">
+                <label for="genero-select">Gênero:</label>
+                <select id="genero-select" name="genero">
+                    <option value="">Todos os Gêneros</option>
+                </select>
+
+                <label for="ano-select">Ano de Lançamento:</label>
+                <select id="ano-select" name="ano">
+                    <option value="">Todos os Anos</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button type="button" id="clear-filter-btn" class="btn-cancel">Limpar Filtro</button>
+                    <button type="submit" class="btn-submit">Aplicar Filtros</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="add-movie-modal" class="modal">
         <div class="modal-content">
