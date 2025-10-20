@@ -12,19 +12,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
     const usuario = usuarioLogadoJSON ? JSON.parse(usuarioLogadoJSON) : {};
     const isDev = usuario && usuario.role && usuario.role.toLowerCase().trim() === 'dev';
+
+    // Elementos de Filtro
+    const filterBtn = document.getElementById('filter-btn');
+    const filterModal = document.getElementById('filter-modal');
+    const filterForm = document.getElementById('filter-form');
+    const clearFilterBtn = document.getElementById('clear-filter-btn');
+    const genreSelect = document.getElementById('genero-select');
+    const yearSelect = document.getElementById('ano-select');
     
     // Linha de depuração para termos certeza da permissão
     console.log('Usuário verificado:', { usuario, isDev });
 
     let allMovies = [];
+    let filterOptionsLoaded = false;
 
     // --- 3. FUNÇÃO PARA RENDERIZAR OS FILMES NA TELA ---
     const renderMovies = (filmes) => {
-        movieList.innerHTML = '';
+    movieList.innerHTML = '';
         if (!filmes || filmes.length === 0) {
             movieList.innerHTML = '<p>Nenhum filme encontrado.</p>';
             return;
-        }
+        }    
 
         filmes.forEach(filme => {
             const movieCard = document.createElement('div');
@@ -44,11 +53,73 @@ document.addEventListener('DOMContentLoaded', async () => {
             movieList.appendChild(movieCard);
         });
     };
+    
+    // --- LÓGICA DO FILTRO ---
+    if (filterBtn) {
+        // Abrir o modal de filtro
+        filterBtn.addEventListener('click', async () => {
+            // Carrega as opções de gênero e ano apenas uma vez
+            if (!filterOptionsLoaded) {
+                try {
+                    const response = await fetch(`${backendUrl}/filmes/filtros`);
+                    const options = await response.json();
+                    
+                    // Preenche o select de Gêneros
+                    options.generos.forEach(g => {
+                        const option = document.createElement('option');
+                        option.value = g;
+                        option.textContent = g;
+                        genreSelect.appendChild(option);
+                    });
+                    // Preenche o select de Anos
+                    options.anos.forEach(a => {
+                        const option = document.createElement('option');
+                        option.value = a;
+                        option.textContent = a;
+                        yearSelect.appendChild(option);
+                    });
+                    filterOptionsLoaded = true;
+                } catch (error) {
+                    console.error("Erro ao carregar opções de filtro:", error);
+                }
+            }
+            filterModal.classList.add('active');
+        });
 
-    // --- 4. FUNÇÃO PARA CARREGAR OS FILMES DO BACKEND ---
-    const loadMovies = async () => {
+        // Fechar o modal de filtro
+        const closeFilterModal = () => filterModal.classList.remove('active');
+        filterModal.querySelector('.close-btn').addEventListener('click', closeFilterModal);
+        filterModal.addEventListener('click', (e) => {
+            if (e.target === filterModal) closeFilterModal();
+        });
+
+        // Aplicar filtros
+        filterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const genero = genreSelect.value;
+            const ano = yearSelect.value;
+            
+            const queryParams = new URLSearchParams();
+            if (genero) queryParams.append('genero', genero);
+            if (ano) queryParams.append('ano', ano);
+            
+            loadMovies(`?${queryParams.toString()}`);
+            closeFilterModal();
+        });
+
+        // Limpar filtros
+        clearFilterBtn.addEventListener('click', () => {
+            filterForm.reset();
+            loadMovies(); // Carrega todos os filmes novamente
+            closeFilterModal();
+        });
+    }
+
+    // --- FUNÇÃO PARA CARREGAR FILMES (AGORA ACEITA FILTROS) ---
+    const loadMovies = async (queryString = '') => {
         try {
-            const response = await fetch(`${backendUrl}/filmes`);
+            movieList.innerHTML = '<p>Carregando filmes...</p>';
+            const response = await fetch(`${backendUrl}/filmes${queryString}`);
             if (!response.ok) throw new Error('Não foi possível carregar os filmes.');
             allMovies = await response.json();
             renderMovies(allMovies);
