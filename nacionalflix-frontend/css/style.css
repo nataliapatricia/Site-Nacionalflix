@@ -621,3 +621,94 @@ a:hover {
     content: "★ "; /* Símbolo de estrela */
     color: #f5c518;
 }
+
+/* Configurações (Página de Plataformas) */
+.streaming-grid {
+    display: grid;
+    /* Ajustado para 4 colunas como na imagem */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px;
+    max-width: 900px;
+    margin: 40px auto;
+    text-align: center;
+}
+
+.streaming-logo {
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.streaming-logo:hover {
+    background-color: #333;
+}
+
+.streaming-logo label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    height: 100%;
+}
+
+.streaming-logo img {
+    max-width: 200px; /* Aumentado para melhor visualização */
+    height: 130px; /* Altura fixa para alinhar os logos */
+    object-fit: contain; /* Garante que o logo caiba sem distorcer */
+    margin-bottom: 15px;
+    transition: filter 0.3s;
+}
+
+.streaming-logo input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #e50914; /* Cor do checkbox */
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 768px) {
+    .streaming-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .streaming-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.page-title {
+    text-align: center;
+}
+
+/* Garante que o container de "Onde Assistir" alinhe os logos */
+.watch-on {
+    margin-top: 0px;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaço entre o título e os logos */
+    flex-wrap: wrap; /* Permite que os logos quebrem a linha se não couberem */
+}
+.watch-on h4 {
+    font-size: 1rem;
+    color: #ddd;
+    flex-shrink: 0; 
+}
+
+/* Estilo dos logos das plataformas */
+.watch-on img {
+    height: 120px; /* Altura padrão para os logos */
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+    filter: grayscale(30%); /* Efeito levemente desaturado */
+    opacity: 0.8;
+}
+
+/* Estilo para a mensagem de "Indisponível" */
+.plataforma-indisponivel {
+    font-size: 0.9em;
+    color: #888;
+    font-style: italic;
+}
