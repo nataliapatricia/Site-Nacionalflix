@@ -115,12 +115,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- FUNÇÃO PARA CARREGAR FILMES (AGORA ACEITA FILTROS) ---
+// --- FUNÇÃO PARA CARREGAR FILMES (ATUALIZADA) ---
     const loadMovies = async (queryString = '') => {
         try {
             movieList.innerHTML = '<p>Carregando filmes...</p>';
-            const response = await fetch(`${backendUrl}/filmes${queryString}`);
-            if (!response.ok) throw new Error('Não foi possível carregar os filmes.');
+            
+            // Constrói os parâmetros de filtro (gênero/ano)
+            const queryParams = new URLSearchParams(queryString);
+            
+            // *** ADICIONA O ID DO USUÁRIO EM TODAS AS REQUISIÇÕES ***
+            queryParams.set('usuario_id', usuario.id);
+            
+            // Busca os filmes
+            const response = await fetch(`${backendUrl}/filmes?${queryParams.toString()}`);
+            if (!response.ok) {
+                 const errorData = await response.json();
+                 // Se o usuário não selecionou nenhuma plataforma, o backend retorna [].
+                 // Mas se der erro 400 (ex: sem usuario_id), mostra a mensagem.
+                 if (response.status === 400) {
+                     throw new Error(errorData.message);
+                 } else {
+                     throw new Error('Não foi possível carregar os filmes.');
+                 }
+            }
             allMovies = await response.json();
             renderMovies(allMovies);
         } catch (error) {

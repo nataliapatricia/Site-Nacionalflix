@@ -81,6 +81,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div id="dots-container" class="dots">${filme.imagens.map((_, i) => `<span class="dot" data-index="${i}"></span>`).join('')}</div>
             </div>` : '<p>Não há imagens na galeria para este filme.</p>';
 
+            // *** NOVO CÓDIGO: CONSTRÓI O HTML DAS PLATAFORMAS ***
+    const plataformasHTML = filme.plataformas && filme.plataformas.length > 0
+        ? filme.plataformas.map(p => 
+            // Cria uma tag de imagem para cada plataforma encontrada
+            `<img src="${p.logo_url}" alt="${p.nome}" title="${p.nome}">`
+          ).join('') // Junta todas as tags de imagem
+        : '<p class="plataforma-indisponivel">Indisponível em plataformas de assinatura.</p>';
+    // *** FIM DO NOVO CÓDIGO ***
+
         // --- 6. RENDERIZANDO O HTML COMPLETO NA PÁGINA ---
         container.innerHTML = `
             <div class="movie-container">
@@ -93,7 +102,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                         <div id="resumo" class="tab-content active">
                             <h3>Sinopse:</h3><p>${filme.sinopse || 'Sinopse não disponível.'}</p>
-                            <div class="watch-on"><h4>Onde assistir:</h4></div>
+                            <div class="watch-on"><h4>Onde assistir:</h4>
+                            ${plataformasHTML}</div>
                         </div>
                         <div id="imagens" class="tab-content">${galleryHTML}</div>
                         <div id="trailer" class="tab-content">
