@@ -115,31 +115,65 @@ router.get('/filmes/filtros', async (req, res) => {
     }
 });
 
-// ROTA DE BUSCAR TODOS OS FILMES (COM FILTRO OPCIONAL)
+// EM routes.js (backend) - SUBSTITUA ESTA ROTA
+
+// EM routes.js (backend) - SUBSTITUA ESTA ROTA INTEIRA
+
 router.get('/filmes', async (req, res) => {
     try {
-        const { genero, ano } = req.query;
-        let query = 'SELECT id, titulo, url_poster FROM filmes';
+        const { genero, ano, usuario_id } = req.query; 
+
+        if (!usuario_id) {
+            return res.status(400).json({ message: "ID do usuário é obrigatório." });
+        }
+
+        // 1. PRIMEIRO: Verificamos se o usuário tem alguma plataforma selecionada
+        const [userPlatforms] = await db.query(
+            'SELECT plataforma_id FROM usuario_plataformas WHERE usuario_id = ?', 
+            [usuario_id]
+        );
+        const hasSelectedPlatforms = userPlatforms.length > 0;
+
+        // 2. SEGUNDO: Montamos a consulta base
+        let query = 'SELECT f.id, f.titulo, f.url_poster FROM filmes f';
         const params = [];
         const whereClauses = [];
 
+        // 3. TERCEIRO: SÓ adicionamos os JOINs de plataforma SE o usuário tiver seleções
+        if (hasSelectedPlatforms) {
+            query += `
+                INNER JOIN filme_plataformas fp ON f.id = fp.filme_id
+                INNER JOIN usuario_plataformas up ON fp.plataforma_id = up.plataforma_id
+            `;
+            whereClauses.push('up.usuario_id = ?');
+            params.push(usuario_id);
+        }
+        // Se 'hasSelectedPlatforms' for false, os JOINs são pulados,
+        // e a consulta buscará em TODOS os filmes.
+
+        // 4. QUARTO: Adicionamos os filtros opcionais de gênero e ano
         if (genero) {
-            whereClauses.push('genero LIKE ?');
+            whereClauses.push('f.genero LIKE ?');
             params.push(`%${genero}%`);
         }
         if (ano) {
-            whereClauses.push('ano_lancamento = ?');
+            whereClauses.push('f.ano_lancamento = ?');
             params.push(ano);
         }
+
+        // 5. QUINTO: Montamos a cláusula WHERE final
         if (whereClauses.length > 0) {
             query += ` WHERE ${whereClauses.join(' AND ')}`;
         }
-        query += ' ORDER BY titulo';
 
+        query += ' GROUP BY f.id ORDER BY f.titulo';
+
+        // 6. SEXTO: Executamos a consulta dinâmica
         const [filmes] = await db.query(query, params);
         res.status(200).json(filmes);
+
     } catch (error) {
-        console.error('Erro ao buscar filmes:', error);
+        console.error('Erro ao buscar filmes filtrados:', error);
         res.status(500).json({ message: 'Erro ao buscar filmes.' });
     }
 });
@@ -161,6 +195,14 @@ router.get('/filmes/:id', async (req, res) => {
         `, [id]);
         const [avgResult] = await db.query('SELECT AVG(nota) as media FROM comentarios WHERE filme_id = ?', [id]);
         const media_avaliacoes = avgResult[0].media || 0;
+        
+        // *** NOVO CÓDIGO: BUSCAR AS PLATAFORMAS DO FILME ***
+        const [plataformas] = await db.query(`
+            SELECT p.nome, p.logo_url 
+            FROM plataformas p
+            INNER JOIN filme_plataformas fp ON p.id = fp.plataforma_id
+            WHERE fp.filme_id = ?
+        `, [id]);
 
         let assistido = false;
         if (usuario_id) { // Só verifica se o ID do usuário foi enviado
@@ -175,7 +217,8 @@ router.get('/filmes/:id', async (req, res) => {
             imagens: imagens.map(img => img.url_imagem),
             comentarios: comentarios,
             media_avaliacoes: media_avaliacoes,
-            assistido: assistido
+            assistido: assistido,
+            plataformas: plataformas
         };
         res.status(200).json(resultado);
     } catch (error) {
@@ -205,43 +248,67 @@ router.delete('/filmes/:id', async (req, res) => {
     }
 });
 
-// ROTA PARA ADICIONAR UM NOVO FILME (ATUALIZADA)
 router.post('/filmes', async (req, res) => {
-    const { titulo, sinopse, ano_lancamento, duracao_min, genero, diretores, elenco, url_poster, url_trailer, imagens } = req.body;
+    // 1. Recebe os dados do formulário, incluindo a nova string 'plataformas'
+    const { 
+        titulo, sinopse, ano_lancamento, duracao_min, genero, 
+        diretores, elenco, url_poster, url_trailer, 
+        imagens, plataformas // 'imagens' é o array de URLs, 'plataformas' é a string "Netflix, Max"
+    } = req.body;
 
-    const connection = await db.getConnection(); // Pega uma conexão para fazer uma transação
+    const connection = await db.getConnection(); 
 
     try {
         await connection.beginTransaction(); // Inicia a transação
 
-        // 1. Insere os dados principais na tabela 'filmes'
+        // 2. Insere os dados principais na tabela 'filmes'
         const [resultFilme] = await connection.query(
             'INSERT INTO filmes (titulo, sinopse, ano_lancamento, duracao_min, genero, diretores, elenco, url_poster, url_trailer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [titulo, sinopse, ano_lancamento, duracao_min, genero, diretores, elenco, url_poster, url_trailer]
         );
-        
         const novoFilmeId = resultFilme.insertId; // Pega o ID do filme que acabamos de criar
 
-        // 2. Verifica se foram enviadas imagens para a galeria
+        // 3. Insere as imagens da galeria (lógica que já tínhamos)
         if (imagens && imagens.length > 0) {
-            // Prepara os dados para inserção em lote na tabela 'imagens_filme'
             const imagensParaInserir = imagens.map(url => [novoFilmeId, url]);
-            
-            await connection.query(
-                'INSERT INTO imagens_filme (filme_id, url_imagem) VALUES ?',
-                [imagensParaInserir]
-            );
+            await connection.query('INSERT INTO imagens_filme (filme_id, url_imagem) VALUES ?', [imagensParaInserir]);
         }
 
+        // 4. *** NOVA LÓGICA PARA AS PLATAFORMAS ***
+        if (plataformas && plataformas.trim() !== '') {
+            // Converte a string "Netflix, Max, Globoplay" em um array ["Netflix", "Max", "Globoplay"]
+            const nomesPlataformas = plataformas.split(',').map(nome => nome.trim());
+
+            if (nomesPlataformas.length > 0) {
+                // Busca os IDs de todas as plataformas que têm esses nomes
+                const [plataformaRows] = await connection.query(
+                    'SELECT id FROM plataformas WHERE nome IN (?)',
+                    [nomesPlataformas]
+                );
+
+                if (plataformaRows.length > 0) {
+                    // Prepara os dados para a inserção em lote: [[filmeId, platId1], [filmeId, platId2], ...]
+                    const filmePlataformasData = plataformaRows.map(p => [novoFilmeId, p.id]);
+                    
+                    // Insere todas as ligações na tabela 'filme_plataformas'
+                    await connection.query(
+                        'INSERT INTO filme_plataformas (filme_id, plataforma_id) VALUES ?',
+                        [filmePlataformasData]
+                    );
+                }
+            }
+        }
+        // *** FIM DA NOVA LÓGICA ***
+
         await connection.commit(); // Confirma a transação (salva tudo no banco)
-        res.status(201).json({ message: 'Filme e imagens adicionados com sucesso!', filmeId: novoFilmeId });
+        res.status(201).json({ message: 'Filme e plataformas adicionados com sucesso!', filmeId: novoFilmeId });
 
     } catch (error) {
-        await connection.rollback(); // Desfaz a transação em caso de erro
+        await connection.rollback(); // Desfaz tudo em caso de erro
         console.error("Erro ao adicionar filme:", error);
         res.status(500).json({ message: 'Erro ao adicionar filme.' });
     } finally {
-        connection.release(); // Libera a conexão de volta para o pool
+        connection.release(); // Libera a conexão
     }
 });
 
@@ -427,6 +494,53 @@ router.get('/historico/:usuario_id', async (req, res) => {
     } catch (error) {
         console.error("Erro ao buscar histórico:", error);
         res.status(500).json({ message: 'Erro ao buscar histórico.' });
+    }
+});
+
+// NOVA ROTA: BUSCAR TODAS AS PLATAFORMAS DISPONÍVEIS
+router.get('/plataformas', async (req, res) => {
+    try {
+        const [plataformas] = await db.query('SELECT id, nome, logo_url FROM plataformas ORDER BY id');
+        res.status(200).json(plataformas);
+    } catch (error) {
+        res.status(500).json({ message: "Erro ao buscar plataformas." });
+    }
+});
+
+// NOVA ROTA: BUSCAR AS PLATAFORMAS DE UM USUÁRIO ESPECÍFICO
+router.get('/usuarios/:id/plataformas', async (req, res) => {
+    try {
+        const [selecionadas] = await db.query(
+            'SELECT plataforma_id FROM usuario_plataformas WHERE usuario_id = ?',
+            [req.params.id]
+        );
+        // Retorna apenas um array de IDs: [1, 3, 5]
+        res.status(200).json(selecionadas.map(p => p.plataforma_id));
+    } catch (error) {
+        res.status(500).json({ message: "Erro ao buscar seleções do usuário." });
+    }
+});
+
+// NOVA ROTA: SALVAR/REMOVER UMA SELEÇÃO (USADA PELOS CHECKBOXES)
+router.post('/plataformas/selecionar', async (req, res) => {
+    const { usuario_id, plataforma_id, selecionado } = req.body;
+    try {
+        if (selecionado) {
+            // Adiciona a seleção (ignora erro se já existir)
+            await db.query(
+                'INSERT INTO usuario_plataformas (usuario_id, plataforma_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE usuario_id=usuario_id',
+                [usuario_id, plataforma_id]
+            );
+        } else {
+            // Remove a seleção
+            await db.query(
+                'DELETE FROM usuario_plataformas WHERE usuario_id = ? AND plataforma_id = ?',
+                [usuario_id, plataforma_id]
+            );
+        }
+        res.status(200).json({ message: 'Seleção salva.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao salvar seleção.' });
     }
 });
 
