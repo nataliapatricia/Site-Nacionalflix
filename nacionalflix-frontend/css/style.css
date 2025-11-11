@@ -11,6 +11,8 @@ body {
     background-color: #141414;
     color: #ffffff;
     font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 a {
@@ -25,17 +27,22 @@ a:hover {
 /* === HEADER (CABEÇALHO) === */
 .main-header {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     padding: 20px 60px;
-    border-bottom: 1px solid #303030;
-    background-color: #141414;
+    background-color: transparent;
+}
+
+.main-nav a {
+    margin-left: 25px;
+    font-size: 1rem;
 }
 
 .logo {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #e50914;
+    color: #e50914; 
+    text-decoration: none; /* <-- ADICIONE ESTA LINHA */
 }
 
 /* === TELAS DE LOGIN, CADASTRO E RECUPERAÇÃO === */
@@ -150,18 +157,53 @@ a:hover {
     padding: 20px 60px;
 }
 
-/* === HEADER (CABEÇALHO) === */
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 60px;
-    background-color: #141414;
+/* --- ESTILOS DO "OLHO" DE SENHA --- */
+
+/* 1. Cria o "envelope" para o input e o botão */
+.password-wrapper {
+    position: relative;
+    width: 100%;
 }
 
-.main-nav a {
-    margin-left: 25px;
-    font-size: 1rem;
+/* 2. Remove a margem padrão do input (o wrapper cuida disso) */
+.auth-form .password-wrapper input {
+    margin-bottom: 0;
+}
+
+/* 3. Ajusta o input para ter espaço para o ícone */
+.auth-form input[type="password"],
+.auth-form input[type="text"] {
+    /* Garante que o input ocupe 100% do wrapper */
+    width: 100%; 
+    /* Adiciona espaço à direita para o texto não passar por baixo do ícone */
+    padding-right: 50px; 
+    box-sizing: border-box; /* Garante que o padding não quebre o layout */
+}
+
+/* 4. Estiliza e posiciona o botão do "olho" */
+.toggle-password {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%; /* Ocupa a altura total do input */
+    width: 50px; /* Largura do botão */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #888; /* Cor do ícone */
+}
+
+.toggle-password:hover {
+    color: #fff; /* Cor do ícone ao passar o mouse */
+}
+
+.toggle-password svg {
+    width: 16px;
+    height: 16px;
 }
 
 
@@ -711,4 +753,22 @@ a:hover {
     font-size: 0.9em;
     color: #888;
     font-style: italic;
+}
+/* --- ESTILO DA IMAGEM DE FUNDO (MÉTODO HTML) --- */
+.site-background {
+    position: fixed; /* Fixa a imagem na tela, ela não rola com o conteúdo */
+    z-index: -1;     /* Esta é a chave: coloca a imagem ATRÁS de todo o resto */
+    top: 0;
+    left: 0;
+    width: 100%;     /* Ocupa 100% da largura da tela */
+    height: 100%;    /* Ocupa 100% da altura da tela */
+}
+
+.site-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Garante que a imagem cubra todo o espaço sem distorcer */
+    
+    /* AQUI ESTÁ SUA OPACIDADE - AJUSTE COMO QUISER */
+    opacity: 0.1;  /* 0.1 = 10% de opacidade. Experimente 0.05 ou 0.2 */
 }
