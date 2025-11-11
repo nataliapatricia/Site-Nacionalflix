@@ -140,6 +140,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             </div>`;
 
+        // --- LÓGICA DO BOTÃO COMPARTILHAR ---
+        const shareBtn = document.querySelector('.btn-share');
+        if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            
+            // Verifica se o objeto 'filme' existe e tem um título
+            if (!filme || !filme.titulo) {
+                console.error("Dados do filme não carregados para compartilhamento.");
+                alert("Não foi possível carregar os dados para compartilhar.");
+                return;
+            }
+
+            const shareData = {
+                title: filme.titulo,
+                text: `Confira este filme incrível no NacionalFlix: ${filme.titulo}`,
+                url: window.location.href // Pega a URL atual da página
+            };
+
+            console.log("Tentando compartilhar:", shareData);
+
+            try {
+                if (navigator.share) {
+                    // Tenta usar a Web Share API nativa
+                    await navigator.share(shareData);
+                    console.log('Página compartilhada com sucesso!');
+                } else {
+                    // Fallback: Copia o link para a área de transferência
+                    await navigator.clipboard.writeText(shareData.url);
+                    alert('Link copiado para a área de transferência! Cole em suas redes sociais.');
+                    console.log('Link copiado para a área de transferência.');
+                }
+            } catch (error) {
+                console.error('Erro ao compartilhar ou copiar:', error);
+                // Ignora o erro se o usuário simplesmente cancelou a caixa de diálogo
+                if (error.name !== 'AbortError') {
+                    alert('Não foi possível compartilhar a página. Tente copiar o link manualmente.');
+                }
+            }
+        });
+    }
+
         // --- 7. ATIVANDO A INTERATIVIDADE APÓS O HTML SER CRIADO ---
         
         // Lógica das Abas

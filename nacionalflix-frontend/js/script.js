@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const backendUrl = 'http://localhost:3000/api';
 
+    
+
     // --- FORMULÁRIO DE LOGIN ---
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -74,4 +76,29 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Se o e-mail existir em nossa base, um link de recuperação será enviado.');
         });
     }
+
+    // Procura os elementos na página
+    const toggleBtn = document.getElementById('toggle-password-btn');
+    const passwordInput = document.getElementById('senha');
+    
+    // Verifica se os elementos do "olho" existem na página atual
+    if (toggleBtn && passwordInput) {
+        const eyeIcon = document.getElementById('svg-eye');
+        const eyeSlashIcon = document.getElementById('svg-eye-slash');
+
+        toggleBtn.addEventListener('click', () => {
+            // Verifica qual é o tipo atual do input
+            if (passwordInput.type === 'password') {
+                // Se for senha, muda para texto e troca os ícones
+                passwordInput.type = 'text';
+                eyeIcon.style.display = 'none';
+                eyeSlashIcon.style.display = 'block';
+            } else {
+                // Se for texto, muda para senha e troca os ícones
+                passwordInput.type = 'password';
+                eyeIcon.style.display = 'block';
+                eyeSlashIcon.style.display = 'none';
+            }
+        });
+    } 
 });
