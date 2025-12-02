@@ -1,37 +1,54 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- 1. SELEÇÃO DE ELEMENTOS PRINCIPAIS E CONFIGURAÇÕES ---
+    
+    // --- 1. FUNÇÃO DE CORREÇÃO DE VÍDEO (DEFINIDA NO TOPO PARA EVITAR ERROS) ---
+const getEmbedUrl = (url) => {
+        // 1. Verificação de segurança
+        if (!url) return '';
+
+        console.log('[VIDEO DEBUG] URL vinda do banco:', url);
+
+        // 2. Expressão Regular para pegar o ID do YouTube (funciona com todos os tipos de link)
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+
+        // 3. Se encontrou um ID válido (11 caracteres)
+        if (match && match[2].length === 11) {
+            const videoId = match[2];
+            const finalUrl = `https://www.youtube.com/embed/${videoId}`;
+            console.log('[VIDEO DEBUG] URL convertida para:', finalUrl);
+            return finalUrl;
+        } else {
+            console.warn('[VIDEO DEBUG] Não foi possível extrair o ID. Retornando original.');
+            return url;
+        }
+    };
+
+    // --- 2. SELEÇÃO DE ELEMENTOS E CONFIGURAÇÕES ---
     const container = document.getElementById('movie-details-container');
     const backendUrl = 'http://localhost:3000/api';
 
-    // Se o container principal não for encontrado, para o script para evitar mais erros.
     if (!container) {
-        console.error("Erro Crítico: O elemento com id 'movie-details-container' não foi encontrado no HTML.");
+        console.error("Erro Crítico: container não encontrado.");
         return;
     }
 
-    // --- 2. VERIFICAÇÃO DE LOGIN E PERMISSÃO ---
+    // --- 3. VERIFICAÇÃO DE LOGIN ---
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
-    // Se não houver dados de usuário na sessão, o global.js já deve ter redirecionado,
-    // mas esta é uma segurança extra para garantir que 'usuario' não seja null.
-    if (!usuarioLogadoJSON) {
-        console.warn("Usuário não logado detectado em filme.js. global.js deveria ter redirecionado.");
-        return; // Encerra se não estiver logado
-    }
-    
+    if (!usuarioLogadoJSON) { return; } 
     const usuario = JSON.parse(usuarioLogadoJSON);
     const isDev = usuario && usuario.role && usuario.role.toLowerCase().trim() === 'dev';
 
-    // --- 3. CAPTURANDO O ID DO FILME DA URL ---
+    // --- 4. CAPTURANDO O ID ---
     const params = new URLSearchParams(window.location.search);
     const filmeId = params.get('id');
 
     if (!filmeId) {
-        container.innerHTML = '<p style="color:red;">Erro: ID do filme não encontrado na URL.</p>';
+        container.innerHTML = '<p style="color:red;">Erro: ID do filme não encontrado.</p>';
         return;
     }
 
     try {
-        // --- 4. BUSCANDO OS DADOS COMPLETOS DO FILME NO BACKEND ---
+        // --- 5. BUSCANDO DADOS ---
         const response = await fetch(`${backendUrl}/filmes/${filmeId}?usuario_id=${usuario.id}`);
         if (!response.ok) {
             const errorData = await response.json();
@@ -41,56 +58,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.title = `${filme.titulo} - NacionalFlix`;
         
-        // --- 5. PREPARANDO BLOCOS DE HTML DINÂMICOS ---
-
-        // Formata a média para ter uma casa decimal e usar vírgula
+        // Formatações
         const mediaFormatada = parseFloat(filme.media_avaliacoes).toFixed(1).replace('.', ',');
-
-        // Verifica se o usuário logado já tem um comentário neste filme
         const userComment = filme.comentarios.find(c => c.usuario_id === usuario.id);
-        const userHasCommented = !!userComment; // true se encontrou, false se não
+        const userHasCommented = !!userComment;
 
-        // Constrói a lista de comentários
+        // HTML dos Comentários
         const commentsHTML = filme.comentarios.length > 0 ? filme.comentarios.map(c => {
+            const dataFormatada = new Date(c.data_comentario).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             const deleteButtonHTML = isDev ? `<button class="delete-comment-btn" data-id="${c.id}" title="Excluir comentário">×</button>` : '';
-            // Botão Editar: só aparece se o comentário for do usuário logado
-            const editButtonHTML = c.usuario_id === usuario.id 
-                ? `<button class="edit-comment-btn" data-id="${c.id}" data-nota="${c.nota}" data-texto="${encodeURIComponent(c.comentario || '')}">Editar comentário</button>` 
-                : ''; 
-        const dataFormatada = new Date(c.data_comentario).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const editButtonHTML = c.usuario_id === usuario.id ? `<button class="edit-comment-btn" data-id="${c.id}" data-nota="${c.nota}" data-texto="${encodeURIComponent(c.comentario || '')}">Editar</button>` : '';
             
             return `
                 <article class="review-card" id="comment-${c.id}">
                     <div class="review-author">
                         <span class="author-score">${c.nota || 'N/A'}</span>
-                        <p>${c.nome_usuario}<span class="comment-date"> - ${dataFormatada}</span></p> ${editButtonHTML}<br>
+                        <p>${c.nome_usuario} <span class="comment-date">- ${dataFormatada}</span> ${editButtonHTML}</p>
                     </div>
                     <div class="review-content"><p>${c.comentario || ''}</p></div>
                     ${deleteButtonHTML}
                 </article>`;
         }).join('') : '<p id="no-comments-msg">Ainda não há comentários para este filme.</p>';
 
-        // Constrói a galeria de imagens
+        // HTML da Galeria
         const galleryHTML = filme.imagens && filme.imagens.length > 0 ? `
             <div class="gallery">
                 <img id="gallery-image" src="${filme.imagens[0]}" alt="Cena de ${filme.titulo}">
                 <button id="prev-btn" class="arrow">&lt;</button>
                 <button id="next-btn" class="arrow">&gt;</button>
             </div>
-            <div class="gallery-nav">
-                <div id="dots-container" class="dots">${filme.imagens.map((_, i) => `<span class="dot" data-index="${i}"></span>`).join('')}</div>
-            </div>` : '<p>Não há imagens na galeria para este filme.</p>';
+            <div class="gallery-nav"><div id="dots-container" class="dots">${filme.imagens.map((_, i) => `<span class="dot" data-index="${i}"></span>`).join('')}</div></div>`
+             : '<p>Não há imagens na galeria para este filme.</p>';
+        
+        // HTML das Plataformas
+        const plataformasHTML = filme.plataformas && filme.plataformas.length > 0
+             ? filme.plataformas.map(p => `<img src="${p.logo_url}" alt="${p.nome}" title="${p.nome}">`).join('')
+             : '<p class="plataforma-indisponivel">Indisponível em plataformas de assinatura.</p>';
 
-            // *** NOVO CÓDIGO: CONSTRÓI O HTML DAS PLATAFORMAS ***
-    const plataformasHTML = filme.plataformas && filme.plataformas.length > 0
-        ? filme.plataformas.map(p => 
-            // Cria uma tag de imagem para cada plataforma encontrada
-            `<img src="${p.logo_url}" alt="${p.nome}" title="${p.nome}">`
-          ).join('') // Junta todas as tags de imagem
-        : '<p class="plataforma-indisponivel">Indisponível em plataformas de assinatura.</p>';
-    // *** FIM DO NOVO CÓDIGO ***
-
-        // --- 6. RENDERIZANDO O HTML COMPLETO NA PÁGINA ---
+        // --- 6. RENDERIZANDO O HTML (AQUI USAMOS getEmbedUrl) ---
         container.innerHTML = `
             <div class="movie-container">
                 <div class="left-column">
@@ -101,21 +106,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <button class="tab-btn" data-tab="trailer">Trailer</button>
                         </div>
                         <div id="resumo" class="tab-content active">
-                            <h3>Sinopse:</h3><p>${filme.sinopse || 'Sinopse não disponível.'}</p>
-                            <div class="watch-on"><h4>Onde assistir:</h4>
-                            ${plataformasHTML}</div>
+                            <h3>Sinopse:</h3><p>${filme.sinopse || 'N/A'}</p>
+                            <div class="watch-on"><h4>Onde assistir:</h4>${plataformasHTML}</div>
                         </div>
                         <div id="imagens" class="tab-content">${galleryHTML}</div>
                         <div id="trailer" class="tab-content">
-                            <div class="trailer-container"><iframe src="${filme.url_trailer}" title="YouTube video player" frameborder="0" allowfullscreen></iframe></div>
+                            <div class="trailer-container">
+                                <iframe src="${getEmbedUrl(filme.url_trailer)}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                            </div>
                         </div>
                     </div>
                     <div class="user-reviews">
                         <h2>Crítica dos Usuários:</h2>
-                        <div class="review-summary">
-                            <span>Média</span>
-                            <div class="rating"><strong id="average-rating">${mediaFormatada}</strong></div>
-                        </div>
+                        <div class="review-summary"><span>Média</span><div class="rating"><strong id="average-rating">${mediaFormatada}</strong></div></div>
                         <div id="comments-section">${commentsHTML}</div>
                     </div>
                 </div>
@@ -140,312 +143,149 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             </div>`;
 
-        // --- LÓGICA DO BOTÃO COMPARTILHAR ---
+        // --- 7. INTERATIVIDADE (BOTÕES, MODAIS, ETC) ---
+        
+        // Botão Compartilhar
         const shareBtn = document.querySelector('.btn-share');
         if (shareBtn) {
-        shareBtn.addEventListener('click', async () => {
-            
-            // Verifica se o objeto 'filme' existe e tem um título
-            if (!filme || !filme.titulo) {
-                console.error("Dados do filme não carregados para compartilhamento.");
-                alert("Não foi possível carregar os dados para compartilhar.");
-                return;
-            }
-
-            const shareData = {
-                title: filme.titulo,
-                text: `Confira este filme incrível no NacionalFlix: ${filme.titulo}`,
-                url: window.location.href // Pega a URL atual da página
-            };
-
-            console.log("Tentando compartilhar:", shareData);
-
-            try {
-                if (navigator.share) {
-                    // Tenta usar a Web Share API nativa
-                    await navigator.share(shareData);
-                    console.log('Página compartilhada com sucesso!');
-                } else {
-                    // Fallback: Copia o link para a área de transferência
-                    await navigator.clipboard.writeText(shareData.url);
-                    alert('Link copiado para a área de transferência! Cole em suas redes sociais.');
-                    console.log('Link copiado para a área de transferência.');
-                }
-            } catch (error) {
-                console.error('Erro ao compartilhar ou copiar:', error);
-                // Ignora o erro se o usuário simplesmente cancelou a caixa de diálogo
-                if (error.name !== 'AbortError') {
-                    alert('Não foi possível compartilhar a página. Tente copiar o link manualmente.');
-                }
-            }
-        });
-    }
-
-        // --- 7. ATIVANDO A INTERATIVIDADE APÓS O HTML SER CRIADO ---
-        
-        // Lógica das Abas
-        const tabButtons = container.querySelectorAll('.tab-btn');
-        const tabContents = container.querySelectorAll('.tab-content');
-        if (tabButtons.length > 0 && tabContents.length > 0) {
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    tabContents.forEach(content => content.classList.remove('active'));
-                    button.classList.add('active');
-                    const targetContent = container.querySelector(`#${button.dataset.tab}`);
-                    if (targetContent) targetContent.classList.add('active');
-                });
+            shareBtn.addEventListener('click', async () => {
+                const shareData = { title: filme.titulo, text: `Confira ${filme.titulo} no NacionalFlix!`, url: window.location.href };
+                try {
+                    if (navigator.share) await navigator.share(shareData);
+                    else { await navigator.clipboard.writeText(shareData.url); alert('Link copiado!'); }
+                } catch (err) { console.error(err); }
             });
         }
 
-        // Lógica do Carrossel de Imagens
+        // Abas
+        const tabButtons = container.querySelectorAll('.tab-btn');
+        const tabContents = container.querySelectorAll('.tab-content');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                container.querySelector(`#${button.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // Carrossel
         if (filme.imagens && filme.imagens.length > 0) {
             let currentIndex = 0;
             const galleryImage = container.querySelector('#gallery-image');
             const dots = container.querySelectorAll('.dot');
-            const prevBtn = container.querySelector('#prev-btn');
-            const nextBtn = container.querySelector('#next-btn');
-            
-            if (galleryImage && dots.length > 0 && prevBtn && nextBtn) {
-                const updateCarousel = () => {
-                    galleryImage.src = filme.imagens[currentIndex];
-                    dots.forEach(dot => dot.classList.remove('active'));
-                    dots[currentIndex].classList.add('active');
-                };
-                nextBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex + 1) % filme.imagens.length;
-                    updateCarousel();
-                });
-                prevBtn.addEventListener('click', () => {
-                    currentIndex = (currentIndex - 1 + filme.imagens.length) % filme.imagens.length;
-                    updateCarousel();
-                });
-                dots.forEach(dot => {
-                    dot.addEventListener('click', (e) => {
-                        currentIndex = parseInt(e.target.dataset.index);
-                        updateCarousel();
-                    });
-                });
-                updateCarousel(); // Inicia o carrossel
-            }
+            const updateCarousel = () => {
+                galleryImage.src = filme.imagens[currentIndex];
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[currentIndex].classList.add('active');
+            };
+            container.querySelector('#next-btn').addEventListener('click', () => { currentIndex = (currentIndex + 1) % filme.imagens.length; updateCarousel(); });
+            container.querySelector('#prev-btn').addEventListener('click', () => { currentIndex = (currentIndex - 1 + filme.imagens.length) % filme.imagens.length; updateCarousel(); });
+            dots.forEach(dot => dot.addEventListener('click', (e) => { currentIndex = parseInt(e.target.dataset.index); updateCarousel(); }));
+            updateCarousel();
         }
-        
-        // Lógica de Exclusão de Comentários (para Devs)
+
+        // Checkbox "Já Assisti"
+        const watchedCheckbox = document.getElementById('watched-checkbox');
+        if (watchedCheckbox) {
+            watchedCheckbox.addEventListener('change', async (e) => {
+                const isChecked = e.target.checked;
+                const method = isChecked ? 'POST' : 'DELETE';
+                const endpoint = isChecked ? `${backendUrl}/historico` : `${backendUrl}/historico/${usuario.id}/${filmeId}`;
+                try {
+                    watchedCheckbox.disabled = true;
+                    const res = await fetch(endpoint, {
+                        method: method, headers: isChecked ? { 'Content-Type': 'application/json' } : {},
+                        body: isChecked ? JSON.stringify({ usuario_id: usuario.id, filme_id: filmeId }) : null
+                    });
+                    if (!res.ok) { e.target.checked = !isChecked; throw new Error('Erro ao atualizar histórico.'); }
+                } catch (err) { alert(err.message); } finally { watchedCheckbox.disabled = false; }
+            });
+        }
+
+        // Exclusão de Comentário (Dev)
         if (isDev) {
             const commentsSection = container.querySelector('#comments-section');
             if(commentsSection) {
                 commentsSection.addEventListener('click', async (e) => {
                     if (e.target.classList.contains('delete-comment-btn')) {
-                        const commentId = e.target.dataset.id;
-                        if (confirm('Tem certeza que deseja excluir este comentário?')) {
+                        if (confirm('Excluir comentário?')) {
                             try {
-                                const response = await fetch(`${backendUrl}/comentarios/${commentId}`, { method: 'DELETE' });
-                                if (!response.ok) throw new Error('Falha ao excluir o comentário.');
-                                e.target.closest('.review-card').remove();
-                                alert('Comentário excluído com sucesso.');
-                                // Recalcular a média após excluir seria ideal, mas requer busca extra.
-                            } catch (error) {
-                                alert(error.message);
-                            }
+                                const res = await fetch(`${backendUrl}/comentarios/${e.target.dataset.id}`, { method: 'DELETE' });
+                                if(res.ok) e.target.closest('.review-card').remove();
+                            } catch(err) { alert(err.message); }
                         }
                     }
                 });
             }
         }
 
-        const watchedCheckbox = document.getElementById('watched-checkbox');
-        if (watchedCheckbox) {
-            // A linha abaixo não é mais necessária pois o estado inicial já vem do HTML
-            // watchedCheckbox.checked = filme.assistido; 
-
-            watchedCheckbox.addEventListener('change', async (e) => {
-                const isChecked = e.target.checked;
-                const method = isChecked ? 'POST' : 'DELETE';
-                const endpoint = isChecked ? `${backendUrl}/historico` : `${backendUrl}/historico/${usuario.id}/${filmeId}`;
-                
-                try {
-                    watchedCheckbox.disabled = true;
-                    const watchResponse = await fetch(endpoint, {
-                        method: method,
-                        headers: isChecked ? { 'Content-Type': 'application/json' } : {},
-                        body: isChecked ? JSON.stringify({ usuario_id: usuario.id, filme_id: filmeId }) : null
-                    });
-                    if (!watchResponse.ok) {
-                        e.target.checked = !isChecked;
-                        let errorMsg = 'Não foi possível atualizar o status.';
-                        try { const errorData = await watchResponse.json(); if (errorData && errorData.message) errorMsg = errorData.message; } catch (parseError) {}
-                        throw new Error(errorMsg);
-                    }
-                    console.log(`Filme ${isChecked ? 'marcado' : 'desmarcado'} como assistido.`);
-                } catch (error) {
-                    alert(error.message);
-                } finally {
-                    watchedCheckbox.disabled = false;
-                }
-            });
-        }
-
-        // --- 8. LÓGICA DO MODAL DE AVALIAÇÃO (ADICIONAR NOVO) ---
+        // Modais (Avaliação e Edição)
         const evaluateBtn = document.querySelector('.btn-evaluate');
-        const reviewModal = document.getElementById('review-modal'); // Certifique-se que o ID no HTML é 'review-modal'
+        const reviewModal = document.getElementById('review-modal');
+        const editModal = document.getElementById('edit-review-modal');
+
+        // Modal Adicionar
         if (evaluateBtn && reviewModal) {
             const reviewForm = document.getElementById('review-form');
-            const starsAdd = reviewModal.querySelectorAll('.star-rating span');
-            const cancelBtnAdd = reviewModal.querySelector('.btn-cancel');
-            const closeModalBtnAdd = reviewModal.querySelector('.close-btn');
-            const commentTextAdd = document.getElementById('comment-text');
-            let currentRatingAdd = 0;
+            const stars = reviewModal.querySelectorAll('.star-rating span');
+            let rating = 0;
+            
+            const closeReview = () => { reviewModal.classList.remove('active'); reviewForm.reset(); rating = 0; stars.forEach(s => s.classList.remove('selected')); };
+            
+            if (!userHasCommented) evaluateBtn.addEventListener('click', () => reviewModal.classList.add('active'));
+            reviewModal.querySelector('.btn-cancel').addEventListener('click', closeReview);
+            reviewModal.querySelector('.close-btn').addEventListener('click', closeReview);
+            
+            stars.forEach(s => s.addEventListener('click', () => { rating = parseInt(s.dataset.value); stars.forEach(st => st.classList.remove('selected')); s.classList.add('selected'); }));
 
-            const openReviewModal = () => { if (!userHasCommented) reviewModal.classList.add('active'); };
-            const closeReviewModal = () => {
-                reviewModal.classList.remove('active');
-                if (reviewForm) reviewForm.reset();
-                currentRatingAdd = 0;
-                starsAdd.forEach(star => star.classList.remove('selected'));
-            };
-
-            if (!userHasCommented) { // Só ativa se o usuário NÃO comentou
-                evaluateBtn.addEventListener('click', openReviewModal);
-            }
-            if(cancelBtnAdd) cancelBtnAdd.addEventListener('click', closeReviewModal);
-            if(closeModalBtnAdd) closeModalBtnAdd.addEventListener('click', closeReviewModal);
-            reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) closeReviewModal(); });
-
-            starsAdd.forEach(star => {
-                star.addEventListener('click', () => {
-                    currentRatingAdd = parseInt(star.dataset.value);
-                    starsAdd.forEach(s => s.classList.remove('selected'));
-                    star.classList.add('selected'); // Adiciona a classe para pintar a estrela
-                });
-            });
-
-            if(reviewForm) reviewForm.addEventListener('submit', async (e) => {
+            reviewForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const comentario = commentTextAdd.value;
-                if (currentRatingAdd === 0) { alert('Selecione uma nota.'); return; }
-                const reviewData = { filme_id: filmeId, usuario_id: usuario.id, nota: currentRatingAdd, comentario: comentario };
-
+                if(rating===0) return alert('Selecione uma nota.');
                 try {
-                    const submitResponse = await fetch(`${backendUrl}/comentarios`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reviewData) });
-                    const responseData = await submitResponse.json();
-                    if (!submitResponse.ok) throw new Error(responseData.message);
-                    
-                    alert('Avaliação enviada com sucesso!');
-
-                    // Atualiza a interface
-                    const averageRatingEl = document.getElementById('average-rating');
-                    if (averageRatingEl && responseData.novaMedia) {
-                        averageRatingEl.textContent = parseFloat(responseData.novaMedia).toFixed(1).replace('.', ',');
-                    }
-                    const commentsSection = document.getElementById('comments-section');
-                    const noCommentsMsg = document.getElementById('no-comments-msg');
-                    if (noCommentsMsg) noCommentsMsg.remove();
-                    const newCommentCard = document.createElement('article');
-                    newCommentCard.className = 'review-card';
-                    newCommentCard.id = `comment-${responseData.commentId}`; // Adiciona ID ao novo comentário
-                    newCommentCard.innerHTML = `
-                        <div class="review-author"><span class="author-score">${reviewData.nota}</span><p>${usuario.nome}</p><button class="edit-comment-btn" data-id="${responseData.commentId}" data-nota="${reviewData.nota}" data-texto="${encodeURIComponent(reviewData.comentario || '')}">Editar</button></div>
-                        <div class="review-content"><p>${reviewData.comentario || ''}</p></div>
-                        ${isDev ? `<button class="delete-comment-btn" data-id="${responseData.commentId}" title="Excluir comentário">×</button>` : ''}
-                    `;
-                    commentsSection.prepend(newCommentCard);
-                    evaluateBtn.textContent = 'Você já avaliou';
-                    evaluateBtn.disabled = true;
-                    closeReviewModal();
-                } catch (error) {
-                    alert(`Erro ao enviar avaliação: ${error.message}`);
-                }
+                    const res = await fetch(`${backendUrl}/comentarios`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({filme_id: filmeId, usuario_id: usuario.id, nota: rating, comentario: document.getElementById('comment-text').value}) });
+                    if(!res.ok) throw new Error((await res.json()).message);
+                    alert('Sucesso!');
+                    location.reload(); // Recarrega para simplificar a atualização
+                } catch(err) { alert(err.message); }
             });
         }
 
-        // --- 9. LÓGICA DO MODAL DE EDIÇÃO ---
-        const editModal = document.getElementById('edit-review-modal'); // Certifique-se que o ID no HTML é 'edit-review-modal'
+        // Modal Editar
         if (editModal) {
             const editForm = document.getElementById('edit-review-form');
             const starsEdit = editModal.querySelectorAll('.star-rating span');
-            const cancelBtnEdit = editModal.querySelector('.btn-cancel');
-            const closeModalBtnEdit = editModal.querySelector('.close-btn');
-            const commentIdInput = document.getElementById('edit-comment-id');
-            const commentTextInput = document.getElementById('edit-comment-text');
-            let currentRatingEdit = 0;
+            let ratingEdit = 0;
+            const closeEdit = () => { editModal.classList.remove('active'); editForm.reset(); ratingEdit = 0; starsEdit.forEach(s => s.classList.remove('selected')); };
 
-            const openEditModal = (commentData) => {
-                commentIdInput.value = commentData.id;
-                commentTextInput.value = decodeURIComponent(commentData.texto); // Decodifica o texto
-                currentRatingEdit = parseFloat(commentData.nota); // Usa parseFloat para notas como 4.0
-                // Marca as estrelas corretas
-                starsEdit.forEach(star => {
-                    star.classList.toggle('selected', parseInt(star.dataset.value) <= currentRatingEdit);
-                });
-                editModal.classList.add('active');
-            };
-            const closeEditModal = () => {
-                editModal.classList.remove('active');
-                if(editForm) editForm.reset();
-                currentRatingEdit = 0;
-                starsEdit.forEach(star => star.classList.remove('selected'));
-            };
-
-            const commentsSection = document.getElementById('comments-section');
-            if (commentsSection) {
-                commentsSection.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('edit-comment-btn')) {
-                        openEditModal(e.target.dataset);
-                    }
-                });
-            }
-
-            if(cancelBtnEdit) cancelBtnEdit.addEventListener('click', closeEditModal);
-            if(closeModalBtnEdit) closeModalBtnEdit.addEventListener('click', closeEditModal);
-            editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
-            
-            starsEdit.forEach(star => {
-                star.addEventListener('click', () => {
-                    currentRatingEdit = parseInt(star.dataset.value);
-                    starsEdit.forEach(s => s.classList.remove('selected'));
-                    star.classList.add('selected'); // Adiciona a classe para pintar a estrela
-                });
-            });
-
-            if (editForm) editForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const commentId = commentIdInput.value;
-                const comentario = commentTextInput.value;
-                if (currentRatingEdit === 0) { alert('Selecione uma nota.'); return; }
-                const updatedData = { usuario_id: usuario.id, nota: currentRatingEdit, comentario: comentario };
-
-                try {
-                    const editResponse = await fetch(`${backendUrl}/comentarios/${commentId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedData) });
-                    const responseData = await editResponse.json();
-                    if (!editResponse.ok) throw new Error(responseData.message);
-
-                    alert('Comentário atualizado com sucesso!');
-
-                    const averageRatingEl = document.getElementById('average-rating');
-                    if (averageRatingEl && responseData.novaMedia) {
-                         averageRatingEl.textContent = parseFloat(responseData.novaMedia).toFixed(1).replace('.', ',');
-                    }
-
-                    const commentCard = document.getElementById(`comment-${commentId}`);
-                    if (commentCard) {
-                        commentCard.querySelector('.author-score').textContent = updatedData.nota;
-                        commentCard.querySelector('.review-content p').textContent = updatedData.comentario || '';
-                        const editBtn = commentCard.querySelector('.edit-comment-btn');
-                        if(editBtn) {
-                            editBtn.dataset.nota = updatedData.nota;
-                            editBtn.dataset.texto = encodeURIComponent(updatedData.comentario || '');
-                        }
-                    }
-                    closeEditModal();
-                } catch (error) {
-                    alert(`Erro ao atualizar comentário: ${error.message}`);
+            document.getElementById('comments-section').addEventListener('click', (e) => {
+                if(e.target.classList.contains('edit-comment-btn')) {
+                    document.getElementById('edit-comment-id').value = e.target.dataset.id;
+                    document.getElementById('edit-comment-text').value = decodeURIComponent(e.target.dataset.texto);
+                    ratingEdit = parseFloat(e.target.dataset.nota);
+                    starsEdit.forEach(s => s.classList.toggle('selected', parseInt(s.dataset.value) <= ratingEdit));
+                    editModal.classList.add('active');
                 }
+            });
+            
+            editModal.querySelector('.btn-cancel').addEventListener('click', closeEdit);
+            editModal.querySelector('.close-btn').addEventListener('click', closeEdit);
+            starsEdit.forEach(s => s.addEventListener('click', () => { ratingEdit = parseInt(s.dataset.value); starsEdit.forEach(st => st.classList.remove('selected')); s.classList.add('selected'); }));
+
+            editForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if(ratingEdit===0) return alert('Selecione uma nota.');
+                try {
+                    const res = await fetch(`${backendUrl}/comentarios/${document.getElementById('edit-comment-id').value}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({usuario_id: usuario.id, nota: ratingEdit, comentario: document.getElementById('edit-comment-text').value}) });
+                    if(!res.ok) throw new Error((await res.json()).message);
+                    alert('Atualizado!');
+                    location.reload();
+                } catch(err) { alert(err.message); }
             });
         }
 
-    // --- 10. TRATAMENTO FINAL DE ERRO ---
     } catch (error) {
-        container.innerHTML = `<p style="color:red;">Ocorreu um erro ao carregar a página: ${error.message}</p>`;
-        console.error('Erro detalhado ao carregar a página:', error);
+        container.innerHTML = `<p style="color:red;">Erro: ${error.message}</p>`;
+        console.error(error);
     }
-}); // <-- FIM DO 'DOMContentLoaded'
+});
