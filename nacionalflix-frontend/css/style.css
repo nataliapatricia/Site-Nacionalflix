@@ -42,7 +42,7 @@ a:hover {
     font-size: 1.8rem;
     font-weight: bold;
     color: #e50914; 
-    text-decoration: none; /* <-- ADICIONE ESTA LINHA */
+    text-decoration: none;
 }
 
 /* === TELAS DE LOGIN, CADASTRO E RECUPERAÇÃO === */
@@ -165,7 +165,7 @@ a:hover {
     width: 100%;
 }
 
-/* 2. Remove a margem padrão do input (o wrapper cuida disso) */
+/* 2. Remove a margem padrão do input */
 .auth-form .password-wrapper input {
     margin-bottom: 0;
 }
@@ -173,11 +173,9 @@ a:hover {
 /* 3. Ajusta o input para ter espaço para o ícone */
 .auth-form input[type="password"],
 .auth-form input[type="text"] {
-    /* Garante que o input ocupe 100% do wrapper */
     width: 100%; 
-    /* Adiciona espaço à direita para o texto não passar por baixo do ícone */
     padding-right: 50px; 
-    box-sizing: border-box; /* Garante que o padding não quebre o layout */
+    box-sizing: border-box;/
 }
 
 /* 4. Estiliza e posiciona o botão do "olho" */
@@ -185,8 +183,8 @@ a:hover {
     position: absolute;
     right: 0;
     top: 0;
-    height: 100%; /* Ocupa a altura total do input */
-    width: 50px; /* Largura do botão */
+    height: 100%;
+    width: 50px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -194,11 +192,11 @@ a:hover {
     align-items: center;
     justify-content: center;
     padding: 0;
-    color: #888; /* Cor do ícone */
+    color: #888;
 }
 
 .toggle-password:hover {
-    color: #fff; /* Cor do ícone ao passar o mouse */
+    color: #fff;
 }
 
 .toggle-password svg {
@@ -232,9 +230,9 @@ a:hover {
 
 .movie-carousel {
     display: flex;
-    flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha */
+    flex-wrap: wrap;
     gap: 25px;
-    justify-content: center; /* Centraliza os cards */
+    justify-content: center;
 }
 
 .movie-card {
@@ -297,7 +295,7 @@ a:hover {
 
 /* Estilos do Modal */
 .modal {
-    display: none; /* Escondido por padrão */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -311,7 +309,7 @@ a:hover {
 }
 
 .modal.active {
-    display: flex; /* Mostra o modal quando tem a classe 'active' */
+    display: flex;
 }
 
 .modal-content {
@@ -375,7 +373,7 @@ a:hover {
 /* === PÁGINAS DE FILMES (filme.html) === */
 .movie-container {
     display: grid;
-    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Proporção ajustada */
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
     gap: 50px;
     max-width: 1300px;
     margin: 40px auto;
@@ -463,14 +461,13 @@ a:hover {
     justify-content: center;
     font-size: 2.5rem;
     margin-bottom: 20px;
-    direction: rtl; /* Inverte a ordem para o efeito de hover funcionar corretamente */
+    direction: rtl;
 }
 .star-rating span {
     color: #555;
     cursor: pointer;
     transition: color 0.2s;
 }
-/* Efeito de hover: a estrela e todas as anteriores (à direita, por causa do rtl) mudam de cor */
 .star-rating span:hover,
 .star-rating span:hover ~ span {
     color: #f5c518;
@@ -565,16 +562,16 @@ a:hover {
     cursor: pointer;
     font-size: 0.9em;
     padding: 2px 5px;
-    margin-left: 10px; /* Espaço entre nome/nota e botão */
-    vertical-align: middle; /* Alinha com o texto */
-    display: inline; /* Garante que fique na linha */
+    margin-left: 10px;
+    vertical-align: middle;
+    display: inline;
 }
 .edit-comment-btn:hover {
     color: #fff;
     text-decoration: underline;
 }
 
-/* Ajustes no Modal de Edição (reutiliza muito do modal de avaliação) */
+/* Ajustes no Modal de Edição */
 #edit-review-modal .modal-content {
     max-width: 450px;
 }
@@ -582,7 +579,7 @@ a:hover {
     text-align: center;
     margin-bottom: 20px;
 }
-#edit-review-form textarea { /* Reutiliza o estilo do textarea anterior */
+#edit-review-form textarea {
     width: 100%;
     height: 120px;
     padding: 10px;
@@ -598,22 +595,20 @@ a:hover {
 .comment-date {
     font-size: 0.8em;
     color: #aaa;
-    margin-left: 8px; /* Pequeno espaço entre o nome e a data */
+    margin-left: 8px;
     display: inline;
 }
-
-/* EM css/style.css */
 
 /* Estilo para o Checkbox "Já Assisti" */
 .watched-container {
     margin-top: 15px;
-    text-align: center; /* Centraliza o label */
+    text-align: center;
 }
 .watched-container label {
     font-size: 0.9em;
     color: #ccc;
     cursor: pointer;
-    display: inline-flex; /* Para alinhar o input e o texto */
+    display: inline-flex;
     align-items: center;
     gap: 8px;
 }
@@ -626,7 +621,7 @@ a:hover {
 /* Estilos para a Página de Histórico */
 .history-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Cria um grid responsivo */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 25px;
     margin-top: 30px;
 }
@@ -634,40 +629,39 @@ a:hover {
 .history-item-card {
     background-color: #1a1a1a;
     border-radius: 8px;
-    overflow: hidden; /* Garante que a imagem não ultrapasse */
+    overflow: hidden;
     text-align: center;
     padding-bottom: 10px;
 }
 
 .history-item-card img {
     width: 100%;
-    height: 270px; /* Altura fixa para os posters */
-    object-fit: cover; /* Garante que a imagem cubra o espaço */
-    display: block; /* Remove espaço extra abaixo da imagem */
+    height: 270px;
+    object-fit: cover;
+    display: block;
 }
 
 .history-item-card h3 {
     font-size: 1em;
     margin: 10px 5px 5px 5px;
-    white-space: nowrap; /* Impede que o título quebre linha */
-    overflow: hidden; /* Esconde o excesso */
-    text-overflow: ellipsis; /* Adiciona "..." */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .your-rating {
     font-size: 0.9em;
-    color: #f5c518; /* Amarelo */
+    color: #f5c518;
     font-weight: bold;
 }
-.your-rating:not(:empty)::before { /* Adiciona texto antes da nota */
-    content: "★ "; /* Símbolo de estrela */
+.your-rating:not(:empty)::before {
+    content: "★ ";
     color: #f5c518;
 }
 
 /* Configurações (Página de Plataformas) */
 .streaming-grid {
     display: grid;
-    /* Ajustado para 4 colunas como na imagem */
     grid-template-columns: repeat(4, 1fr); 
     gap: 20px;
     max-width: 900px;
@@ -696,9 +690,9 @@ a:hover {
 }
 
 .streaming-logo img {
-    max-width: 200px; /* Aumentado para melhor visualização */
-    height: 130px; /* Altura fixa para alinhar os logos */
-    object-fit: contain; /* Garante que o logo caiba sem distorcer */
+    max-width: 200px;
+    height: 130px;
+    object-fit: contain;
     margin-bottom: 15px;
     transition: filter 0.3s;
 }
@@ -706,7 +700,7 @@ a:hover {
 .streaming-logo input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    accent-color: #e50914; /* Cor do checkbox */
+    accent-color: #e50914;
 }
 
 /* Ajuste para telas menores */
@@ -729,8 +723,8 @@ a:hover {
     margin-top: 0px;
     display: flex;
     align-items: center;
-    gap: 15px; /* Espaço entre o título e os logos */
-    flex-wrap: wrap; /* Permite que os logos quebrem a linha se não couberem */
+    gap: 15px;
+    flex-wrap: wrap;
 }
 .watch-on h4 {
     font-size: 1rem;
@@ -740,11 +734,11 @@ a:hover {
 
 /* Estilo dos logos das plataformas */
 .watch-on img {
-    height: 120px; /* Altura padrão para os logos */
+    height: 120px;
     width: auto;
     max-width: 150px;
     object-fit: contain;
-    filter: grayscale(30%); /* Efeito levemente desaturado */
+    filter: grayscale(30%);
     opacity: 0.8;
 }
 
@@ -756,19 +750,17 @@ a:hover {
 }
 /* --- ESTILO DA IMAGEM DE FUNDO (MÉTODO HTML) --- */
 .site-background {
-    position: fixed; /* Fixa a imagem na tela, ela não rola com o conteúdo */
-    z-index: -1;     /* Esta é a chave: coloca a imagem ATRÁS de todo o resto */
+    position: fixed;
+    z-index: -1; 
     top: 0;
     left: 0;
-    width: 100%;     /* Ocupa 100% da largura da tela */
-    height: 100%;    /* Ocupa 100% da altura da tela */
+    width: 100%;
+    height: 100%;
 }
 
 .site-background img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Garante que a imagem cubra todo o espaço sem distorcer */
-    
-    /* AQUI ESTÁ SUA OPACIDADE - AJUSTE COMO QUISER */
-    opacity: 0.1;  /* 0.1 = 10% de opacidade. Experimente 0.05 ou 0.2 */
+    object-fit: cover;
+    opacity: 0.1;
 }
