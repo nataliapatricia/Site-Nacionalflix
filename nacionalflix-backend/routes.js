@@ -115,10 +115,6 @@ router.get('/filmes/filtros', async (req, res) => {
     }
 });
 
-// EM routes.js (backend) - SUBSTITUA ESTA ROTA
-
-// EM routes.js (backend) - SUBSTITUA ESTA ROTA INTEIRA
-
 router.get('/filmes', async (req, res) => {
     try {
         const { genero, ano, usuario_id } = req.query; 
@@ -231,19 +227,22 @@ router.get('/filmes/:id', async (req, res) => {
 router.delete('/filmes/:id', async (req, res) => {
     const { id } = req.params;
     try {
+        // Tenta excluir. Graças ao ON DELETE CASCADE no banco, 
+        // isso deve levar junto comentários, imagens e histórico.
         const [result] = await db.query('DELETE FROM filmes WHERE id = ?', [id]);
         
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Filme não encontrado para exclusão.' });
+            return res.status(404).json({ message: 'Filme não encontrado.' });
         }
-
-        // Graças ao "ON DELETE CASCADE" no banco, as imagens e comentários
-        // relacionados a este filme também são excluídos automaticamente.
 
         res.status(200).json({ message: 'Filme excluído com sucesso.' });
 
     } catch (error) {
         console.error('Erro ao excluir filme:', error);
+        // Se der erro de chave estrangeira (banco mal configurado), avisa
+        if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+            return res.status(409).json({ message: 'Não é possível excluir este filme pois há dados vinculados a ele (verifique o ON DELETE CASCADE).' });
+        }
         res.status(500).json({ message: 'Erro ao excluir o filme.' });
     }
 });
@@ -359,7 +358,12 @@ router.post('/comentarios', async (req, res) => {
 router.delete('/comentarios/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        await db.query('DELETE FROM comentarios WHERE id = ?', [id]);
+        const [result] = await db.query('DELETE FROM comentarios WHERE id = ?', [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Comentário não encontrado.' });
+        }
+        
         res.status(200).json({ message: 'Comentário excluído com sucesso.' });
     } catch (error) {
         console.error("Erro ao excluir comentário:", error);
