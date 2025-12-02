@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const backendUrl = 'http://localhost:3000/api';
 
-    
-
     // --- FORMULÁRIO DE LOGIN ---
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -56,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(data.message);
 
                 if (response.ok) {
-                    window.location.href = 'index.html'; // Redireciona para a tela de login
+                    window.location.href = 'index.html';
                 }
             } catch (error) {
                 console.error('Erro ao tentar cadastrar:', error);

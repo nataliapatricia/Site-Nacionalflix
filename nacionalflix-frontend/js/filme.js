@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // --- 1. FUNÇÃO DE CORREÇÃO DE VÍDEO (DEFINIDA NO TOPO PARA EVITAR ERROS) ---
 const getEmbedUrl = (url) => {
-        // 1. Verificação de segurança
         if (!url) return '';
 
         console.log('[VIDEO DEBUG] URL vinda do banco:', url);
@@ -95,7 +94,7 @@ const getEmbedUrl = (url) => {
              ? filme.plataformas.map(p => `<img src="${p.logo_url}" alt="${p.nome}" title="${p.nome}">`).join('')
              : '<p class="plataforma-indisponivel">Indisponível em plataformas de assinatura.</p>';
 
-        // --- 6. RENDERIZANDO O HTML (AQUI USAMOS getEmbedUrl) ---
+        // 6. RENDERIZANDO O HTML
         container.innerHTML = `
             <div class="movie-container">
                 <div class="left-column">

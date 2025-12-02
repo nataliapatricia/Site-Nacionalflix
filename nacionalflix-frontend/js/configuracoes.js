@@ -1,10 +1,8 @@
-// NOVO ARQUIVO: js/configuracoes.js
-
 document.addEventListener('DOMContentLoaded', async () => {
     const grid = document.getElementById('streaming-grid');
     const backendUrl = 'http://localhost:3000/api';
 
-    // 1. Pega o ID do usuário logado (assumindo que global.js já protegeu a página)
+    // 1. Pega o ID do usuário logado
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
     const usuario = JSON.parse(usuarioLogadoJSON);
 
@@ -14,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // 2. Busca todas as plataformas E as seleções do usuário ao mesmo tempo
+        // 2. Busca todas as plataformas e as seleções do usuário ao mesmo tempo
         const [plataformasResponse, userSelectionsResponse] = await Promise.all([
             fetch(`${backendUrl}/plataformas`),
             fetch(`${backendUrl}/usuarios/${usuario.id}/plataformas`)
@@ -30,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Cria um Set (conjunto) com os IDs para verificação rápida
         const userSelections = new Set(userSelectionIds);
 
-        grid.innerHTML = ''; // Limpa o "Carregando..."
+        grid.innerHTML = '';
 
         // 3. Renderiza o grid de plataformas
         todasPlataformas.forEach(plataforma => {
@@ -66,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             selecionado: selecionado
                         })
                     });
-                    // Sucesso!
                 } catch (error) {
                     console.error('Erro ao salvar seleção:', error);
                     alert('Erro ao salvar, tente novamente.');

@@ -63,15 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const response = await fetch(`${backendUrl}/filmes/filtros`);
                     const options = await response.json();
-                    
-                    // Preenche o select de Gêneros
                     options.generos.forEach(g => {
                         const option = document.createElement('option');
                         option.value = g;
                         option.textContent = g;
                         genreSelect.appendChild(option);
                     });
-                    // Preenche o select de Anos
                     options.anos.forEach(a => {
                         const option = document.createElement('option');
                         option.value = a;
@@ -110,28 +107,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Limpar filtros
         clearFilterBtn.addEventListener('click', () => {
             filterForm.reset();
-            loadMovies(); // Carrega todos os filmes novamente
+            loadMovies();
             closeFilterModal();
         });
     }
 
-// --- FUNÇÃO PARA CARREGAR FILMES (ATUALIZADA) ---
+    // --- FUNÇÃO PARA CARREGAR FILMES
     const loadMovies = async (queryString = '') => {
         try {
             movieList.innerHTML = '<p>Carregando filmes...</p>';
             
-            // Constrói os parâmetros de filtro (gênero/ano)
             const queryParams = new URLSearchParams(queryString);
             
-            // *** ADICIONA O ID DO USUÁRIO EM TODAS AS REQUISIÇÕES ***
             queryParams.set('usuario_id', usuario.id);
             
             // Busca os filmes
             const response = await fetch(`${backendUrl}/filmes?${queryParams.toString()}`);
             if (!response.ok) {
                  const errorData = await response.json();
-                 // Se o usuário não selecionou nenhuma plataforma, o backend retorna [].
-                 // Mas se der erro 400 (ex: sem usuario_id), mostra a mensagem.
                  if (response.status === 400) {
                      throw new Error(errorData.message);
                  } else {
@@ -149,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (isDev) {
         // Verifica se o botão realmente existe no HTML antes de tentar usá-lo
         if (addMovieBtn) {
-            addMovieBtn.style.display = 'block'; // Mostra o botão "+ Adicionar Filme"
+            addMovieBtn.style.display = 'block';
 
             const openModal = () => modal.classList.add('active');
             const closeModal = () => {
@@ -202,17 +195,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- 7. LÓGICA DE EXCLUSÃO (SÓ PARA DEVS) ---
-    if (isDev) {
-        movieList.addEventListener('click', async (e) => {
+    movieList.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const filmeId = e.target.dataset.id;
                 const filmeTitulo = e.target.closest('.movie-card').querySelector('p').textContent;
+
                 if (confirm(`Tem certeza que deseja excluir "${filmeTitulo}"?`)) {
-                    // Lógica de exclusão aqui
+                    try {
+                        const response = await fetch(`${backendUrl}/filmes/${filmeId}`, { method: 'DELETE' });
+                        
+                        if (!response.ok) throw new Error('Falha ao excluir o filme.');
+                        
+                        e.target.closest('.movie-card').remove();
+                        alert(`"${filmeTitulo}" foi excluído.`);
+                    } catch (error) {
+                        alert(error.message);
+                    }
                 }
             }
-        });
-    }
+        })
 
     // --- 8. INICIA A PÁGINA CARREGANDO OS FILMES ---
     loadMovies();

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const historyList = document.getElementById('history-list');
     const backendUrl = 'http://localhost:3000/api';
 
-    // Pega o ID do usuário logado (assumindo que global.js já protegeu a página)
+    // Pega o ID do usuário logado
     const usuarioLogadoJSON = sessionStorage.getItem('usuarioLogado');
     const usuario = JSON.parse(usuarioLogadoJSON);
 
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const historico = await response.json();
 
-        historyList.innerHTML = ''; // Limpa o "Carregando..."
+        historyList.innerHTML = '';
 
         if (historico.length === 0) {
             historyList.innerHTML = '<p>Você ainda não marcou nenhum filme como assistido.</p>';
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         historico.forEach(item => {
             const historyItem = document.createElement('div');
-            historyItem.className = 'history-item-card'; // Usaremos um estilo de card
+            historyItem.className = 'history-item-card';
             historyItem.innerHTML = `
                 <a href="filme.html?id=${item.id}">
                     <img src="${item.url_poster}" alt="${item.titulo}">
